@@ -1,3 +1,5 @@
+package compiler;
+
 /**
  * 符号类型，为避免和Java的关键字Object冲突，我们改成Objekt
  */
@@ -25,7 +27,7 @@ public class Table {
 	 * 名字表，请使用get()函数访问
 	 * @see #get(int)
 	 */
-	private Item[] table = new Item[PL0.txmax];
+	private Item[] table = new Item[PL0.TABLE_MAX];
 	
 	/**
 	 * 当前名字表项指针，也可以理解为当前有效的名字表大小（table size）
@@ -54,15 +56,15 @@ public class Table {
 	public void enter(Objekt k, int lev, int dx) {
 		tx ++;
 		Item item = get(tx);
-		item.name = PL0.lex.id;			// 注意id和num都是从词法分析器获得
+		item.name = PL0.scanner.id;			// 注意id和num都是从词法分析器获得
 		item.kind = k;
 		switch (k) {
 		case constant:					// 常量名字
-			if (PL0.lex.num > PL0.amax) {
+			if (PL0.scanner.num > PL0.MAX_NUM) {
 				Err.report(31);		// 数字过大溢出
 				item.val = 0;
 			} else {
-				item.val = PL0.lex.num;
+				item.val = PL0.scanner.num;
 			}
 			break;
 		case variable:					// 变量名字 
@@ -80,7 +82,7 @@ public class Table {
 	 * @param start 当前作用域符号表区间的左端
 	 */
 	public void debugTable(int start) {
-		if (!PL0.tableswitch)
+		if (!PL0.tableSwitch)
 			return;
 		System.out.println("TABLE:");
 		if (start >= tx)
@@ -99,7 +101,7 @@ public class Table {
 				break;
 			}
 			System.out.println(msg);
-			PL0.fas.println(msg);
+			PL0.tablePrintStream.println(msg);
 		}
 		System.out.println();
 	}

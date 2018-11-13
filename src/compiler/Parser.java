@@ -1,3 +1,5 @@
+package compiler;
+
 /**
  *　　语法分析器。这是PL/0分析器中最重要的部分，在语法分析的过程中穿插着语法错误检查和目标代码生成。
  */
@@ -76,8 +78,8 @@ public class Parser {
 	 * 获得下一个语法符号，这里只是简单调用一下getsym()
 	 */
 	public void nextSym() {
-		lex.getsym();
-		sym =lex.sym;
+		lex.getSymbol();
+		sym =lex.currentSymbol;
 	}
 	
 	/**
@@ -119,7 +121,7 @@ public class Parser {
 		
 		interp.gen(Fct.JMP, 0, 0);
 		
-		if (lev > PL0.levmax)
+		if (lev > PL0.LEVEL_MAX)
 			Err.report(32);
 		
 		// 分析<说明部分>
@@ -127,7 +129,7 @@ public class Parser {
 			// <常量说明部分>
 			if (sym == Symbol.constsym) {
 				nextSym();
-				// the original do...while(sym == ident) is problematic, thanks to calculous
+				// the original do...while(currentSymbol == ident) is problematic, thanks to calculous
 				// do
 				parseConstDeclaration(lev);
 				while (sym == Symbol.comma) {
@@ -139,13 +141,13 @@ public class Parser {
 					nextSym();
 				else
 					Err.report(5);				// 漏掉了逗号或者分号
-				// } while (sym == ident);
+				// } while (currentSymbol == ident);
 			}
 			
 			// <变量说明部分>
 			if (sym == Symbol.varsym) {
 				nextSym();
-				// the original do...while(sym == ident) is problematic, thanks to calculous
+				// the original do...while(currentSymbol == ident) is problematic, thanks to calculous
 				// do {
 				parseVarDeclaration(lev);
 				while (sym == Symbol.comma)
@@ -158,7 +160,7 @@ public class Parser {
 					nextSym();
 				else
 					Err.report(5);				// 漏掉了逗号或者分号
-				// } while (sym == ident);
+				// } while (currentSymbol == ident);
 			}
 			
 			// <过程说明部分>
@@ -217,7 +219,7 @@ public class Parser {
 		nxtlev = new SymSet(symnum);	// 分程序没有补救集合
 		test(fsys, nxtlev, 8);				// 检测后跟符号正确性
 		
-		interp.listcode(cx0);
+		interp.listCode(cx0);
 		
 		dx = dx0;							// 恢复堆栈帧计数器
 		table.tx = tx0;						// 回复名字表位置
@@ -583,7 +585,7 @@ public class Parser {
 		test(facbegsys, fsys, 24);			// 检测因子的开始符号
 		// the original while... is problematic: var1(var2+var3)
 		// thanks to macross
-		// while(inset(sym, facbegsys))
+		// while(inset(currentSymbol, facbegsys))
 		if (facbegsys.get(sym)) {
 			if (sym == Symbol.ident) {			// 因子为常量或变量
 				int i = table.position(lex.id);
@@ -606,7 +608,7 @@ public class Parser {
 				nextSym();
 			} else if (sym == Symbol.number) {	// 因子为数 
 				int num = lex.num;
-				if (num > PL0.amax) {
+				if (num > PL0.MAX_NUM) {
 					Err.report(31);
 					num = 0;
 				}

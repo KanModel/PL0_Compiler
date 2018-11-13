@@ -1,3 +1,5 @@
+package compiler;
+
 /**
  *　　这个类只是包含了报错函数以及错误计数器。
  */
@@ -12,11 +14,11 @@ public class Err {
 	 * @param errcode 错误码
 	 */
 	public static void report(int errcode) {
-		char[] s = new char[PL0.lex.cc-1];
+		char[] s = new char[PL0.scanner.charCounter -1];
 		java.util.Arrays.fill(s, ' ');
 		String space = new String(s);
 		System.out.println("****" + space + "!" + errcode);
-		PL0.fa1.println("****" + space + "!" + errcode);
+		PL0.sourcePrintStream.println("****" + space + "!" + errcode);
 		err ++;
 	}
 }

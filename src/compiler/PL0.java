@@ -1,3 +1,5 @@
+package compiler;
+
 import java.io.*;
 
 /**
@@ -9,29 +11,29 @@ import java.io.*;
  */
 public class PL0 {
 	// 编译程序的常数
-	public static final int al = 10;			// 符号的最大长度
-	public static final int amax = 2047;		// 最大允许的数值
-	public static final int cxmax = 500;		// 最多的虚拟机代码数
-	public static final int levmax = 3;			// 最大允许过程嵌套声明层数 [0, levmax]
-	public static final int nmax = 14;			// number的最大位数
-	public static final int norw = 32;			// 关键字个数
-	public static final int txmax = 100;		// 名字表容量
+	public static final int SYMBOL_MAX_LENGTH = 10;			// 符号的最大长度
+	public static final int MAX_NUM = 2047;		// 最大允许的数值
+	public static final int CX_MAX = 500;		// 最多的虚拟机代码数
+	public static final int LEVEL_MAX = 3;			// 最大允许过程嵌套声明层数 [0, LEVEL_MAX]
+	public static final int MAX_NUM_DIGIT = 14;			// number的最大位数
+	public static final int KEYWORD_COUNT = 32;			// 关键字个数
+	public static final int TABLE_MAX = 100;		// 名字表容量
 	
 	// 一些全局变量，其他关键的变量分布如下：
-	// cx, code : Interpreter
-	// dx : Parser
-	// tx, table : Table
-	public static PrintStream fa;				// 输出虚拟机代码
-	public static PrintStream fa1;				// 输出源文件及其各行对应的首地址
-	public static PrintStream fa2;				// 输出结果
-	public static PrintStream fas;				// 输出名字表
-	public static boolean listswitch;			// 显示虚拟机代码与否
-	public static boolean tableswitch;			// 显示名字表与否
+	// cx, code : compiler.Interpreter
+	// dx : compiler.Parser
+	// tx, table : compiler.Table
+	public static PrintStream pcodePrintStream;				// 输出虚拟机代码
+	public static PrintStream sourcePrintStream;				// 输出源文件及其各行对应的首地址
+	public static PrintStream resultPrintStream;				// 输出结果
+	public static PrintStream tablePrintStream;				// 输出名字表
+	public static boolean listSwitch;			// 显示虚拟机代码与否
+	public static boolean tableSwitch;			// 显示名字表与否
 	
 	// 一个典型的编译器的组成部分
-	public static Scanner lex;					// 词法分析器
+	public static Scanner scanner;					// 词法分析器
 	public static Parser  parser;				// 语法分析器
-	public static Interpreter interp;			// 类P-Code解释器（及目标代码生成工具）
+	public static Interpreter interpreter;			// 类P-Code解释器（及目标代码生成工具）
 	public static Table table;					// 名字表
 	
 	// 为避免多次创建BufferedReader，我们使用全局统一的Reader
@@ -44,9 +46,9 @@ public class PL0 {
 	public PL0(BufferedReader fin) {
 		// 各部件的构造函数中都含有C语言版本的 init() 函数的一部分代码
 		table = new Table();
-		interp = new Interpreter();
-		lex = new Scanner(fin);
-		parser = new Parser(lex, table, interp);
+		interpreter = new Interpreter();
+		scanner = new Scanner(fin);
+		parser = new Parser(scanner, table, interpreter);
 	}
 
 	/**
@@ -57,8 +59,8 @@ public class PL0 {
 		boolean abort = false;
 		
 		try {
-			PL0.fa = new PrintStream("fa.tmp");
-			PL0.fas = new PrintStream("fas.tmp");
+			PL0.pcodePrintStream = new PrintStream("pcodePrintStream.tmp");
+			PL0.tablePrintStream = new PrintStream("tablePrintStream.tmp");
 			parser.nextSym();		// 前瞻分析需要预先读入一个符号
 			parser.parse();			// 开始语法分析过程（连同语法检查、目标代码生成）
 		} catch (Error e) {
@@ -66,9 +68,9 @@ public class PL0 {
 			abort = true;
 		} catch (IOException e) {
 		} finally { 
-			PL0.fa.close();
-			PL0.fa1.close();
-			PL0.fas.close();
+			PL0.pcodePrintStream.close();
+			PL0.sourcePrintStream.close();
+			PL0.tablePrintStream.close();
 		}
 		if (abort)
 			System.exit(0);
@@ -87,7 +89,6 @@ public class PL0 {
 		BufferedReader fin;
 		try {
 			// 输入文件名
-			fname = "";
 			System.out.print("Input pl/0 file?   ");
 			while (fname.equals(""))
 				fname = stdin.readLine();
@@ -98,26 +99,26 @@ public class PL0 {
 			System.out.print("List object code?(Y/N)");
 			while (fname.equals(""))
 				fname = stdin.readLine();
-			PL0.listswitch = (fname.charAt(0)=='y' || fname.charAt(0)=='Y');
+			PL0.listSwitch = (fname.charAt(0)=='y' || fname.charAt(0)=='Y');
 			
 			// 是否输出名字表
 			fname = "";
 			System.out.print("List symbol table?(Y/N)");
 			while (fname.equals(""))
 				fname = stdin.readLine();
-			PL0.tableswitch = (fname.charAt(0)=='y' || fname.charAt(0)=='Y');
+			PL0.tableSwitch = (fname.charAt(0)=='y' || fname.charAt(0)=='Y');
 			
-			PL0.fa1 = new PrintStream("fa1.tmp");
-			PL0.fa1.println("Input pl/0 file?   " + fname);
+			PL0.sourcePrintStream = new PrintStream("sourcePrintStream.tmp");
+			PL0.sourcePrintStream.println("Input pl/0 file?   " + fname);
 
 			// 构造编译器并初始化
 			PL0 pl0 = new PL0(fin);
 			
 			if (pl0.compile()) {
 				// 如果成功编译则接着解释运行
-				PL0.fa2 = new PrintStream("fa2.tmp");
-				interp.interpret();
-				PL0.fa2.close();
+				PL0.resultPrintStream = new PrintStream("resultPrintStream.tmp");
+				interpreter.interpret();
+				PL0.resultPrintStream.close();
 			} else {
 				System.out.print("Errors in pl/0 program");
 			}
