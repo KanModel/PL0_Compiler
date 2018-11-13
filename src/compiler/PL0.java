@@ -22,7 +22,7 @@ public class PL0 {
 	// 一些全局变量，其他关键的变量分布如下：
 	// cx, code : compiler.Interpreter
 	// dx : compiler.Parser
-	// tx, table : compiler.Table
+	// tableSize, table : compiler.Table
 	public static PrintStream pcodePrintStream;				// 输出虚拟机代码
 	public static PrintStream sourcePrintStream;				// 输出源文件及其各行对应的首地址
 	public static PrintStream resultPrintStream;				// 输出结果
@@ -61,7 +61,7 @@ public class PL0 {
 		try {
 			PL0.pcodePrintStream = new PrintStream("pcodePrintStream.tmp");
 			PL0.tablePrintStream = new PrintStream("tablePrintStream.tmp");
-			parser.nextSym();		// 前瞻分析需要预先读入一个符号
+			parser.nextSymbol();		// 前瞻分析需要预先读入一个符号
 			parser.parse();			// 开始语法分析过程（连同语法检查、目标代码生成）
 		} catch (Error e) {
 			// 如果是发生严重错误则直接中止

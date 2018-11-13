@@ -81,7 +81,7 @@ public class Scanner {
 		charTable['/'] = Symbol.slash;
 		charTable['('] = Symbol.lparen;
 		charTable[')'] = Symbol.rparen;
-		charTable['='] = Symbol.eql;
+		charTable['='] = Symbol.equal;
 		charTable[','] = Symbol.comma;
 		charTable['.'] = Symbol.period;
 		charTable['#'] = Symbol.neq;
@@ -93,19 +93,19 @@ public class Scanner {
 		
 		// ÉèÖÃ±£Áô×Ö·ûºÅ
 		keywordTable = new Symbol[PL0.KEYWORD_COUNT];
-		keywordTable[0] = Symbol.beginsym;
-		keywordTable[1] = Symbol.callsym;
-		keywordTable[2] = Symbol.constsym;
-		keywordTable[3] = Symbol.dosym;
-		keywordTable[4] = Symbol.endsym;
-		keywordTable[5] = Symbol.ifsym;
-		keywordTable[6] = Symbol.oddsym;
-		keywordTable[7] = Symbol.procsym;
-		keywordTable[8] = Symbol.readsym;
-		keywordTable[9] = Symbol.thensym;
-		keywordTable[10] = Symbol.varsym;
-		keywordTable[11] = Symbol.whilesym;
-		keywordTable[12] = Symbol.writesym;
+		keywordTable[0] = Symbol.beginSym;
+		keywordTable[1] = Symbol.callSym;
+		keywordTable[2] = Symbol.constSym;
+		keywordTable[3] = Symbol.doSym;
+		keywordTable[4] = Symbol.endSym;
+		keywordTable[5] = Symbol.ifSym;
+		keywordTable[6] = Symbol.oddSym;
+		keywordTable[7] = Symbol.procSym;
+		keywordTable[8] = Symbol.readSym;
+		keywordTable[9] = Symbol.thenSym;
+		keywordTable[10] = Symbol.varSym;
+		keywordTable[11] = Symbol.whileSym;
+		keywordTable[12] = Symbol.writeSym;
 	}
 	
 	/**

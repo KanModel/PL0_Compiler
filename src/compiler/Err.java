@@ -11,14 +11,14 @@ public class Err {
 	
 	/**
 	 * ±¨´íº¯Êı
-	 * @param errcode ´íÎóÂë
+	 * @param errCode ´íÎóÂë
 	 */
-	public static void report(int errcode) {
+	public static void report(int errCode) {
 		char[] s = new char[PL0.scanner.charCounter -1];
 		java.util.Arrays.fill(s, ' ');
 		String space = new String(s);
-		System.out.println("****" + space + "!" + errcode);
-		PL0.sourcePrintStream.println("****" + space + "!" + errcode);
+		System.out.println("****" + space + "!" + errCode);
+		PL0.sourcePrintStream.println("****" + space + "!" + errCode);
 		err ++;
 	}
 }
