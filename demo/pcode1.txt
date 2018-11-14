@@ -1,15 +1,15 @@
-const a=10;
-var b,c;
-procedure p;
-    begin
-        c:=b+a
-    end;
-begin
-    read(b);
-    while b#0 do
-    begin
-        call p;
-        write(2*c);
-        read(b)
-    end
-end.
+const a=10; {comment}
+var b,c;{comment}
+procedure p;{comment}
+    begin{comment}
+        c:=b+a{comment}
+    end;{comment}
+begin{comment}
+    read(b);{comment}
+    while b#0 do{comment}
+    begin{comment}
+        call p;{comment}
+        write(2*c);{comment}
+        read(b){comment}
+    end {whileÑ­»·¿ªÊ¼}
+end.{comment}

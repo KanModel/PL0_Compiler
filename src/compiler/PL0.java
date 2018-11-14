@@ -59,8 +59,8 @@ public class PL0 {
 		boolean abort = false;
 		
 		try {
-			PL0.pcodePrintStream = new PrintStream("pcodePrintStream.tmp");
-			PL0.tablePrintStream = new PrintStream("tablePrintStream.tmp");
+			PL0.pcodePrintStream = new PrintStream("pcode.tmp");
+			PL0.tablePrintStream = new PrintStream("table.tmp");
 			parser.nextSymbol();		// 前瞻分析需要预先读入一个符号
 			parser.parse();			// 开始语法分析过程（连同语法检查、目标代码生成）
 		} catch (Error e) {
@@ -84,7 +84,7 @@ public class PL0 {
 	 */
 	public static void main(String[] args) {
 		// 原来 C 语言版的一些语句划分到compile()和Parser.parse()中
-		String fname = "";
+		String fname = "D:\\ALL_WORKSPACE\\JAVA\\Course_CS\\PL0_JAVA\\demo\\pcode1.txt";
 		stdin = new BufferedReader(new InputStreamReader(System.in));
 		BufferedReader fin;
 		try {
@@ -95,20 +95,20 @@ public class PL0 {
 			fin = new BufferedReader(new FileReader(fname), 4096);
 
 			// 是否输出虚拟机代码
-			fname = "";
+			fname = "y";
 			System.out.print("List object code?(Y/N)");
 			while (fname.equals(""))
 				fname = stdin.readLine();
 			PL0.listSwitch = (fname.charAt(0)=='y' || fname.charAt(0)=='Y');
 			
 			// 是否输出名字表
-			fname = "";
+			fname = "y";
 			System.out.print("List symbol table?(Y/N)");
 			while (fname.equals(""))
 				fname = stdin.readLine();
 			PL0.tableSwitch = (fname.charAt(0)=='y' || fname.charAt(0)=='Y');
 			
-			PL0.sourcePrintStream = new PrintStream("sourcePrintStream.tmp");
+			PL0.sourcePrintStream = new PrintStream("source.tmp");
 			PL0.sourcePrintStream.println("Input pl/0 file?   " + fname);
 
 			// 构造编译器并初始化
@@ -116,7 +116,7 @@ public class PL0 {
 			
 			if (pl0.compile()) {
 				// 如果成功编译则接着解释运行
-				PL0.resultPrintStream = new PrintStream("resultPrintStream.tmp");
+				PL0.resultPrintStream = new PrintStream("result.tmp");
 				interpreter.interpret();
 				PL0.resultPrintStream.close();
 			} else {
