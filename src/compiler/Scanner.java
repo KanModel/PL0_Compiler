@@ -14,7 +14,12 @@ public class Scanner {
     private char justReadChar = ' ';
 
     /**
-     * 当前读入的行
+     * 当前行号
+     */
+    public int lineCounter = 0;
+
+    /**
+     * 当前读入的行 字符数组
      */
     private char[] currentLine;
 
@@ -115,16 +120,18 @@ public class Scanner {
      * 读取一个字符，为减少磁盘I/O次数，每次读取一行
      */
     void getChar() {
-        String l = "";
+        String line = "";
         try {
             if (charCounter == currentLineLength) {
-                while (l.equals(""))
-                    l = inReader.readLine().toLowerCase() + "\n";
-                currentLineLength = l.length();
+                while (line.equals("")) {
+                    line = inReader.readLine().toLowerCase() + "\n";
+                    lineCounter++;
+                }
+                currentLineLength = line.length();
                 charCounter = 0;
-                currentLine = l.toCharArray();
-                System.out.println(PL0.interpreter.cx + " " + l);
-                PL0.sourcePrintStream.println(PL0.interpreter.cx + " " + l);
+                currentLine = line.toCharArray();
+                System.out.println(PL0.interpreter.cx + " " + line);
+                PL0.sourcePrintStream.println(PL0.interpreter.cx + " " + line);
             }
         } catch (IOException e) {
             throw new Error("program imcomplete");
