@@ -5,23 +5,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * ¡¡¡¡Õâ¸öÀàÖ»ÊÇ°üº¬ÁË±¨´íº¯ÊıÒÔ¼°´íÎó¼ÆÊıÆ÷¡£
+ * ã€€ã€€è¿™ä¸ªç±»åªæ˜¯åŒ…å«äº†æŠ¥é”™å‡½æ•°ä»¥åŠé”™è¯¯è®¡æ•°å™¨ã€‚
  */
 public class Err {
     /**
-     * ´íÎó¼ÆÊıÆ÷£¬±àÒë¹ı³ÌÖĞÒ»¹²ÓĞ¶àÉÙ¸ö´íÎó
+     * é”™è¯¯è®¡æ•°å™¨ï¼Œç¼–è¯‘è¿‡ç¨‹ä¸­ä¸€å…±æœ‰å¤šå°‘ä¸ªé”™è¯¯
      */
     public static int err = 0;
 
     /**
-     * ´íÎóÄÚÈİ¼ÇÂ¼
+     * é”™è¯¯å†…å®¹è®°å½•
      */
     public static ArrayList<ErrorInfo> errors = new ArrayList<>();
 
     /**
-     * ±¨´íº¯Êı
+     * æŠ¥é”™å‡½æ•°
      *
-     * @param errCode ´íÎóÂë
+     * @param errCode é”™è¯¯ç 
      */
     public static void report(int errCode) {
         char[] s = new char[PL0.scanner.charCounter - 1];
@@ -59,21 +59,35 @@ class ErrorReason {
     public static Map<Integer, String> reason = new HashMap<>();
 
     public static void init() {
-        reason.put(1, "°Ñ = Ğ´³ÉÁË :=");
-        reason.put(2, "³£Á¿ËµÃ÷ = ºóÓ¦ÊÇÊı×Ö");
-        reason.put(3, "³£Á¿ËµÃ÷±êÊ¶ºóÓ¦ÊÇ =");
-        reason.put(4, "procedureºóÓ¦Îª±êÊ¶·û const ºóÓ¦ÊÇ±êÊ¶·û var ºóÓ¦ÊÇ±êÊ¶");
-        reason.put(5, "Â©µôÁË¶ººÅ»òÕß·ÖºÅ");
-        reason.put(9, "È±ÉÙ¾äºÅ");
-        reason.put(10, "È±ÉÙ·ÖºÅ");
-        reason.put(11, "±êÊ¶·ûÎ´¶¨Òå");
+        reason.put(1, "æŠŠ = å†™æˆäº† :=");
+        reason.put(2, "å¸¸é‡è¯´æ˜ = ååº”æ˜¯æ•°å­—");
+        reason.put(3, "å¸¸é‡è¯´æ˜æ ‡è¯†ååº”æ˜¯ =");
+        reason.put(4, "procedureååº”ä¸ºæ ‡è¯†ç¬¦ const ååº”æ˜¯æ ‡è¯†ç¬¦ var ååº”æ˜¯æ ‡è¯†");
+        reason.put(5, "æ¼æ‰äº†é€—å·æˆ–è€…åˆ†å·");
+        reason.put(9, "ç¼ºå°‘å¥å·");
+        reason.put(10, "ç¼ºå°‘åˆ†å·");
+        reason.put(11, "æ ‡è¯†ç¬¦æœªå®šä¹‰");
+        reason.put(12, "èµ‹å€¼è¯­å¥æ ¼å¼é”™è¯¯");
+        reason.put(13, "æ²¡æœ‰æ£€æµ‹åˆ°èµ‹å€¼ç¬¦å·");
+        reason.put(14, "callååº”ä¸ºæ ‡è¯†ç¬¦");
+        reason.put(15, "callåæ ‡è¯†ç¬¦åº”ä¸ºè¿‡ç¨‹");
+        reason.put(16, "ç¼ºå°‘then");
+        reason.put(17, "ç¼ºå°‘endæˆ–åˆ†å·");
+        reason.put(18, "ç¼ºå°‘do");
+        reason.put(21, "ä¸èƒ½ä¸ºè¿‡ç¨‹");
+        reason.put(22, "ç¼ºå°‘å³æ‹¬å·");
+        reason.put(31, "è¶…è¿‡æ•°å€¼èŒƒå›´");
+        reason.put(32, "read()ä¸­çš„æ ‡è¯†ç¬¦ä¸æ˜¯å˜é‡");
+        reason.put(33, "write()ä¸­åº”ä¸ºå®Œæ•´è¡¨è¾¾å¼");
+        reason.put(34, "æ ¼å¼é”™è¯¯ï¼Œåº”æ˜¯å·¦æ‹¬å·");
+        reason.put(35, "read()ä¸­åº”æ˜¯å£°æ˜è¿‡çš„å˜é‡å");
     }
 
     public static String get(int errCode) {
         if (reason.get(errCode) != null) {
             return reason.get(errCode);
         } else {
-            return "Î´ÖªÔ­Òò";
+            return "æœªçŸ¥åŸå› ";
         }
     }
 }
