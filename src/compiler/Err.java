@@ -66,6 +66,7 @@ class ErrorReason {
         reason.put(5, "漏掉了逗号或者分号");
         reason.put(9, "缺少句号");
         reason.put(10, "缺少分号");
+        reason.put(11, "标识符未定义");
     }
 
     public static String get(int errCode) {

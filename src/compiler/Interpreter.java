@@ -25,6 +25,12 @@ class Instruction {
      * Ö¸Áî²ÎÊý
      */
     public int a;
+
+    public Instruction(Fct f, int l, int a) {
+        this.f = f;
+        this.l = l;
+        this.a = a;
+    }
 }
 
 /**
@@ -51,15 +57,15 @@ public class Interpreter {
      * @param y instruction.l
      * @param z instruction.a
      */
-    public void gen(Fct x, int y, int z) {
+    public void generatePCode(Fct x, int y, int z) {
         if (cx >= PL0.CX_MAX) {
             throw new Error("Program too long");
         }
 
-        code[cx] = new Instruction();
-        code[cx].f = x;
-        code[cx].l = y;
-        code[cx].a = z;
+        code[cx] = new Instruction(x, y, z);
+//        code[cx].f = x;
+//        code[cx].l = y;
+//        code[cx].a = z;
         cx++;
     }
 
