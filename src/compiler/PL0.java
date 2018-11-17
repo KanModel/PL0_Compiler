@@ -87,7 +87,7 @@ public class PL0 {
 	    ErrorReason.init();
 
 		// 原来 C 语言版的一些语句划分到compile()和Parser.parse()中
-		String fname = "D:\\ALL_WORKSPACE\\JAVA\\Course_CS\\PL0_JAVA\\demo\\pcode4.txt";//todo
+		String fname = "";
 		stdin = new BufferedReader(new InputStreamReader(System.in));
 		BufferedReader fin;
 		try {
@@ -98,14 +98,14 @@ public class PL0 {
 			fin = new BufferedReader(new FileReader(fname), 4096);
 
 			// 是否输出虚拟机代码
-			fname = "y";//todo
+			fname = "";
 			System.out.print("List object code?(Y/N)");
 			while (fname.equals(""))
 				fname = stdin.readLine();
 			PL0.listSwitch = (fname.charAt(0)=='y' || fname.charAt(0)=='Y');
 
 			// 是否输出名字表
-			fname = "y";//todo
+			fname = "";
 			System.out.print("List symbol table?(Y/N)");
 			while (fname.equals(""))
 				fname = stdin.readLine();
