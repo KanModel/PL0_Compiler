@@ -87,8 +87,8 @@ public class Scanner {
         charTable['-'] = Symbol.minus;
         charTable['*'] = Symbol.times;
         charTable['/'] = Symbol.slash;
-        charTable['('] = Symbol.lparen;
-        charTable[')'] = Symbol.rparen;
+        charTable['('] = Symbol.lParen;
+        charTable[')'] = Symbol.rParen;
         charTable['='] = Symbol.equal;
         charTable[','] = Symbol.comma;
         charTable['.'] = Symbol.period;
@@ -240,12 +240,32 @@ public class Scanner {
                 break;
             case '{':        //注释
                 getChar();
-                int count = 1000;
+                int count = 1000;//注释最长长度
                 while ((justReadChar != '}') && count-- > 0) {
                     getChar();
                 }
                 currentSymbol = Symbol.comment;
                 getChar();
+                break;
+            case '+'://todo
+                getChar();
+                if (justReadChar == '+') {
+                    currentSymbol = Symbol.plusplus;
+                    getChar();
+                } else {
+                    //单个+号
+                    currentSymbol = Symbol.plus;
+                }
+                break;
+            case '-':
+                getChar();
+                if (justReadChar == '-') {
+                    currentSymbol = Symbol.minusminus;
+                    getChar();
+                } else {
+                    //单个-号
+                    currentSymbol = Symbol.minus;
+                }
                 break;
             default:        // 其他为单字符操作符（如果符号非法则返回nil）
                 currentSymbol = charTable[justReadChar];

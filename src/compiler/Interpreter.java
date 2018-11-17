@@ -177,6 +177,12 @@ public class Interpreter {
                             PL0.resultPrintStream.println(s[t]);
                             t++;
                             break;
+                        case 17:
+                            s[t - 1] = s[t - 1] + 1;
+                            break;
+                        case 18:
+                            s[t - 1] = s[t - 1] - 1;
+                            break;
                     }
                     break;
                 case LOD:                // 取相对当前过程的数据基地址为a的内存的值到栈顶

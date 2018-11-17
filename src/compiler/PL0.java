@@ -67,6 +67,7 @@ public class PL0 {
 			// 如果是发生严重错误则直接中止
 			abort = true;
 		} catch (IOException e) {
+			e.printStackTrace();
 		} finally { 
 			PL0.pcodePrintStream.close();
 			PL0.sourcePrintStream.close();
@@ -86,7 +87,7 @@ public class PL0 {
 	    ErrorReason.init();
 
 		// 原来 C 语言版的一些语句划分到compile()和Parser.parse()中
-		String fname = "";
+		String fname = "D:\\ALL_WORKSPACE\\JAVA\\Course_CS\\PL0_JAVA\\demo\\pcode4.txt";//todo
 		stdin = new BufferedReader(new InputStreamReader(System.in));
 		BufferedReader fin;
 		try {
@@ -97,25 +98,25 @@ public class PL0 {
 			fin = new BufferedReader(new FileReader(fname), 4096);
 
 			// 是否输出虚拟机代码
-			fname = "";
+			fname = "y";//todo
 			System.out.print("List object code?(Y/N)");
 			while (fname.equals(""))
 				fname = stdin.readLine();
 			PL0.listSwitch = (fname.charAt(0)=='y' || fname.charAt(0)=='Y');
-			
+
 			// 是否输出名字表
-			fname = "";
+			fname = "y";//todo
 			System.out.print("List symbol table?(Y/N)");
 			while (fname.equals(""))
 				fname = stdin.readLine();
 			PL0.tableSwitch = (fname.charAt(0)=='y' || fname.charAt(0)=='Y');
-			
+
 			PL0.sourcePrintStream = new PrintStream("source.tmp");
 			PL0.sourcePrintStream.println("Input pl/0 file?   " + fname);
 
 			// 构造编译器并初始化
 			PL0 pl0 = new PL0(fin);
-			
+
 			if (pl0.compile()) {
 				// 如果成功编译则接着解释运行
 				PL0.resultPrintStream = new PrintStream("result.tmp");
@@ -125,7 +126,7 @@ public class PL0 {
 				System.out.print("Errors in pl/0 program");
 				Err.showResult();
 			}
-			
+
 		} catch (IOException e) {
 			System.out.println("Can't open file!");
 		}
