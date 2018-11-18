@@ -150,7 +150,7 @@ public class Scanner {
         while (Character.isWhitespace(justReadChar))        // 跳过所有空白字符
             getChar();
 
-        if (justReadChar >= 'a' && justReadChar <= 'z') {
+        if ((justReadChar >= 'a' && justReadChar <= 'z') || justReadChar == '_') {
             // 关键字或者一般标识符
             matchKeywordOrIdentifier();
         } else if (justReadChar >= '0' && justReadChar <= '9') {
@@ -172,7 +172,7 @@ public class Scanner {
         do {
             sb.append(justReadChar);
             getChar();
-        } while (justReadChar >= 'a' && justReadChar <= 'z' || justReadChar >= '0' && justReadChar <= '9');
+        } while (justReadChar >= 'a' && justReadChar <= 'z' || justReadChar >= '0' && justReadChar <= '9' || justReadChar == '_');
         id = sb.toString();
 
         // 然后搜索是不是保留字（请注意使用的是什么搜索方法）
