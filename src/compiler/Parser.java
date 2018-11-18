@@ -528,14 +528,34 @@ public class Parser {
             Table.Item item = identTable.get(i);
             if (item.kind == Objekt.variable) {
                 nextSymbol();
-                if (currentSymbol == Symbol.becomes)
+                if (currentSymbol == Symbol.becomes) {
                     nextSymbol();
-                else
-                    Err.report(13);                    // 没有检测到赋值符号
-                nxtlev = (SymSet) fsys.clone();
-                parseExpression(nxtlev, lev);
-                // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
-                interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
+
+                    nxtlev = (SymSet) fsys.clone();
+                    parseExpression(nxtlev, lev);
+                    // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
+                    interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
+                } else if(currentSymbol == Symbol.plusAssSym){
+                    nextSymbol();
+
+                    nxtlev = (SymSet) fsys.clone();
+                    interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr);
+                    parseExpression(nxtlev, lev);
+                    // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
+                    interpreter.generatePCode(Fct.OPR, 0, 2);
+                    interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
+                } else if(currentSymbol == Symbol.minusAssSym){
+                    nextSymbol();
+
+                    nxtlev = (SymSet) fsys.clone();
+                    interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr);
+                    parseExpression(nxtlev, lev);
+                    // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
+                    interpreter.generatePCode(Fct.OPR, 0, 3);
+                    interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
+                } else {
+                    Err.report(13);                // 没有检测到赋值符号
+                }
             } else {
                 Err.report(12);                        // 赋值语句格式错误
             }
@@ -784,7 +804,7 @@ public class Parser {
             nxtlev = (SymSet) fsys.clone();
             nxtlev.set(Symbol.plusplus);
             nxtlev.set(Symbol.minusminus);
-            parseTerm(nxtlev, lev);
+            parseTerm(nxtlev, lev);//分析因子
 
             if (addop == Symbol.plusplus) {
                 interpreter.generatePCode(Fct.OPR, 0, 17);
@@ -807,7 +827,7 @@ public class Parser {
     }
 
     /**
-     * 分析<写语句>
+     * 分析<开方语句>
      *
      * @param fsys  后跟符号集
      * @param level 当前层次

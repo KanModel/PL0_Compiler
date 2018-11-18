@@ -1,0 +1,24 @@
+const a=200, e = 100;
+var b, c;
+procedure pp;
+    var d;
+    begin
+        d := 10;
+        while d#1 do
+        begin
+            write(d);
+            d := d - 1;
+        end;
+    end;
+begin
+    begin
+        b := a * e;
+        c := a * b;
+        c := +(a * a);
+        call pp;
+        c--;
+        write(a);
+        write(c);
+
+    end
+end.

@@ -1,0 +1,8 @@
+var __;
+begin
+    __:=16;
+    __+=9;
+    write(__);
+    sqrt(__);
+    write(__);
+end.

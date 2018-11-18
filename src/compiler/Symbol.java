@@ -14,6 +14,8 @@ public enum Symbol {
     readSym, doSym, callSym, constSym, varSym, procSym,
     sqrtSym, //开方
     comment, //注释
+    plusAssSym,
+    minusAssSym,
     plusplus, //自增符号++
     minusminus //自减符号--
 }

@@ -172,7 +172,8 @@ public class Scanner {
         do {
             sb.append(justReadChar);
             getChar();
-        } while (justReadChar >= 'a' && justReadChar <= 'z' || justReadChar >= '0' && justReadChar <= '9' || justReadChar == '_');
+        }
+        while (justReadChar >= 'a' && justReadChar <= 'z' || justReadChar >= '0' && justReadChar <= '9' || justReadChar == '_');
         id = sb.toString();
 
         // 然后搜索是不是保留字（请注意使用的是什么搜索方法）
@@ -248,10 +249,13 @@ public class Scanner {
                 currentSymbol = Symbol.comment;
                 getChar();
                 break;
-            case '+'://todo
+            case '+':
                 getChar();
                 if (justReadChar == '+') {
                     currentSymbol = Symbol.plusplus;
+                    getChar();
+                } else if (justReadChar == '=') {
+                    currentSymbol = Symbol.plusAssSym;
                     getChar();
                 } else {
                     //单个+号
@@ -262,6 +266,9 @@ public class Scanner {
                 getChar();
                 if (justReadChar == '-') {
                     currentSymbol = Symbol.minusminus;
+                    getChar();
+                } else if (justReadChar == '=') {
+                    currentSymbol = Symbol.minusAssSym;
                     getChar();
                 } else {
                     //单个-号
