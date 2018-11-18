@@ -149,8 +149,6 @@ public class Parser {
                 else
                     Err.report(5);                // 漏掉了逗号或者分号
                 // } while (currentSymbol == ident);
-
-//                isComment();
             }
 
             // <变量说明部分>
@@ -170,13 +168,8 @@ public class Parser {
                     Err.report(5);                // 漏掉了逗号或者分号
                 // } while (currentSymbol == ident);
 
-//                isComment();
             }
 
-////             <注释说明部分>
-//            while (currentSymbol == Symbol.comment) {
-//                nextSymbol();
-//            }
 
             // <过程说明部分>
             while (currentSymbol == Symbol.procSym) {
@@ -321,12 +314,14 @@ public class Parser {
             case minusminus://todo
                 parsePlusMinusAssign(fsys, level);
                 break;
+            case sqrtSym:
+                parseSqrtStatement(fsys, level);
+                break;
             default:
                 nxtlev = new SymSet(SYMBOL_NUM);
                 test(fsys, nxtlev, 19);
                 break;
         }
-//        isComment();
     }
 
     /**
@@ -464,7 +459,6 @@ public class Parser {
 
             if (currentSymbol == Symbol.rParen) {
                 nextSymbol();
-//                isComment();
             } else {
                 Err.report(33);
             }                // write()中应为完整表达式
@@ -620,46 +614,6 @@ public class Parser {
     }
 
     /**
-     * 分析<表达式>
-     *
-     * @param fsys 后跟符号集
-     * @param lev  当前层次
-     */
-    private void parsePlusMinusAssign(SymSet fsys, int lev) {
-        Symbol addop;
-        SymSet nxtlev;
-
-        // 分析{[+|-|++|--]<项>}
-        if (currentSymbol == Symbol.plusplus || currentSymbol == Symbol.minusminus) {
-            addop = currentSymbol;
-            nextSymbol();
-
-            nxtlev = (SymSet) fsys.clone();
-            nxtlev.set(Symbol.plusplus);
-            nxtlev.set(Symbol.minusminus);
-            parseTerm(nxtlev, lev);
-
-            if (addop == Symbol.plusplus) {
-                interpreter.generatePCode(Fct.OPR, 0, 17);
-            } else {
-                interpreter.generatePCode(Fct.OPR, 0, 18);
-            }
-
-            int i = identTable.position(scanner.id);
-            if (i > 0) {
-                Table.Item item = identTable.get(i);
-                if (item.kind == Objekt.variable) {
-                    interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);//保存栈顶到变量值
-                } else {
-                    Err.report(12);                        // 赋值语句格式错误
-                }
-            } else {
-                Err.report(11);                            // 变量未找到
-            }
-        }
-    }
-
-    /**
      * 分析<项>
      *
      * @param fsys 后跟符号集
@@ -809,6 +763,81 @@ public class Parser {
     void isComment() {
         while (currentSymbol == Symbol.comment) {
             nextSymbol();
+        }
+    }
+
+    /**
+     * 分析<表达式>
+     *
+     * @param fsys 后跟符号集
+     * @param lev  当前层次
+     */
+    private void parsePlusMinusAssign(SymSet fsys, int lev) {
+        Symbol addop;
+        SymSet nxtlev;
+
+        // 分析{[+|-|++|--]<项>}
+        if (currentSymbol == Symbol.plusplus || currentSymbol == Symbol.minusminus) {
+            addop = currentSymbol;
+            nextSymbol();
+
+            nxtlev = (SymSet) fsys.clone();
+            nxtlev.set(Symbol.plusplus);
+            nxtlev.set(Symbol.minusminus);
+            parseTerm(nxtlev, lev);
+
+            if (addop == Symbol.plusplus) {
+                interpreter.generatePCode(Fct.OPR, 0, 17);
+            } else {
+                interpreter.generatePCode(Fct.OPR, 0, 18);
+            }
+
+            int i = identTable.position(scanner.id);
+            if (i > 0) {
+                Table.Item item = identTable.get(i);
+                if (item.kind == Objekt.variable) {
+                    interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);//保存栈顶到变量值
+                } else {
+                    Err.report(12);                        // 赋值语句格式错误
+                }
+            } else {
+                Err.report(11);                            // 变量未找到
+            }
+        }
+    }
+
+    /**
+     * 分析<写语句>
+     *
+     * @param fsys  后跟符号集
+     * @param level 当前层次
+     */
+    private void parseSqrtStatement(SymSet fsys, int level) {
+        SymSet nxtlev;
+
+        nextSymbol();
+        if (currentSymbol == Symbol.lParen) {
+            nextSymbol();
+            nxtlev = (SymSet) fsys.clone();//后跟符号集的拷贝 用于传入表达式分析
+            nxtlev.set(Symbol.rParen);//添加后跟符号 右括号
+            parseExpression(nxtlev, level);
+            interpreter.generatePCode(Fct.OPR, 0, 19);
+
+            if (currentSymbol == Symbol.rParen) {
+                nextSymbol();
+            } else {
+                Err.report(33);
+            }
+
+            int i = identTable.position(scanner.id);
+            if (i > 0) {
+                Table.Item item = identTable.get(i);
+                if (item.kind == Objekt.variable) {
+                    interpreter.generatePCode(Fct.STO, level - item.level, item.adr);//保存栈顶到变量值
+                }
+            } else {
+                Err.report(11);                            // 变量未找到
+            }
         }
     }
 }

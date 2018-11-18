@@ -12,6 +12,7 @@ public enum Symbol {
     becomes, //赋值:=
     beginSym, endSym, ifSym, thenSym, whileSym, writeSym,
     readSym, doSym, callSym, constSym, varSym, procSym,
+    sqrtSym, //开方
     comment, //注释
     plusplus, //自增符号++
     minusminus //自减符号--

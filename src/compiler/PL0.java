@@ -130,7 +130,5 @@ public class PL0 {
 		} catch (IOException e) {
 			System.out.println("Can't open file!");
 		}
-
-		System.out.println();
 	}
 }

@@ -97,7 +97,7 @@ public class Scanner {
 
         // ÉèÖÃ±£Áô×ÖÃû×Ö,°´ÕÕ×ÖÄ¸Ë³Ğò£¬±ãÓÚÕÛ°ë²éÕÒ
         keyword = new String[]{"begin", "call", "const", "do", "end", "if",
-                "odd", "procedure", "read", "then", "var", "while", "write"};
+                "odd", "procedure", "read", "sqrt", "then", "var", "while", "write"};
 
         // ÉèÖÃ±£Áô×Ö·ûºÅ
         keywordTable = new Symbol[PL0.KEYWORD_COUNT];
@@ -110,10 +110,11 @@ public class Scanner {
         keywordTable[6] = Symbol.oddSym;
         keywordTable[7] = Symbol.procSym;
         keywordTable[8] = Symbol.readSym;
-        keywordTable[9] = Symbol.thenSym;
-        keywordTable[10] = Symbol.varSym;
-        keywordTable[11] = Symbol.whileSym;
-        keywordTable[12] = Symbol.writeSym;
+        keywordTable[9] = Symbol.sqrtSym;
+        keywordTable[10] = Symbol.thenSym;
+        keywordTable[11] = Symbol.varSym;
+        keywordTable[12] = Symbol.whileSym;
+        keywordTable[13] = Symbol.writeSym;
     }
 
     /**
