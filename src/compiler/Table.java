@@ -49,6 +49,17 @@ public class Table {
         return table[i];
     }
 
+    public Item copyItem(Item copy){
+        Item clone = new Item();
+        clone.adr = copy.adr;
+        clone.kind = copy.kind;
+        clone.name = copy.name;
+        clone.level = copy.level;
+        clone.val = copy.val;
+        clone.size = copy.size;
+        return clone;
+    }
+
     /**
      * 把某个符号登陆到名字表中，注意参数跟C语言版本不同
      *

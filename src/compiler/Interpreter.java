@@ -4,7 +4,7 @@ package compiler;
  * 类P-Code指令类型
  */
 enum Fct {
-    LIT, OPR, LOD, STO, CAL, INT, JMP, JPC
+    LIT, OPR, LOD, STO, CAL, INT, JMP, JPC, LAD, STA
 }
 
 /**
@@ -63,9 +63,6 @@ public class Interpreter {
         }
 
         code[cx] = new Instruction(x, y, z);
-//        code[cx].f = x;
-//        code[cx].l = y;
-//        code[cx].a = z;
         cx++;
     }
 
@@ -88,7 +85,7 @@ public class Interpreter {
      * 解释程序
      */
     public void interpret() {
-        int p, b, t;                        // 指令指针，指令基址，栈顶指针
+        int p, b, t;                        // 指令指针，指令基址，栈顶指针 t代表栈顶下一个新空间的位置
         Instruction i;                            // 存放当前指令
         int[] s = new int[STACK_SIZE];        // 栈
 
@@ -192,9 +189,16 @@ public class Interpreter {
                     s[t] = s[base(i.l, s, b) + i.a];
                     t++;
                     break;
+                case LAD:                // 以栈顶的数据为偏移量读取数据
+                    s[t - 1] = s[base(i.l, s, b) + i.a - s[t - 1]];
+                    break;
                 case STO:                // 栈顶的值存到相对当前过程的数据基地址为a的内存
                     t--;
                     s[base(i.l, s, b) + i.a] = s[t];
+                    break;
+                case STA:                // 以次栈顶的数据为偏移量保存栈顶数据
+                    s[base(i.l, s, b) + i.a - s[t - 2]] = s[t - 1];
+                    t -= 2;
                     break;
                 case CAL:                // 调用子过程
                     s[t] = base(i.l, s, b);    // 将静态作用域基地址入栈
@@ -216,6 +220,7 @@ public class Interpreter {
                     break;
             }
         } while (p != 0);
+        System.out.println();
     }
 
     /**

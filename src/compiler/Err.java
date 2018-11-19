@@ -81,6 +81,7 @@ class ErrorReason {
         reason.put(33, "write()中应为完整表达式");
         reason.put(34, "格式错误，应是左括号");
         reason.put(35, "read()中应是声明过的变量名");
+        reason.put(41, "数组下标越界");
     }
 
     public static String get(int errCode) {

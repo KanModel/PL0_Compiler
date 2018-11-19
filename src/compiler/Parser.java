@@ -542,7 +542,7 @@ public class Parser {
             Table.Item item = identTable.get(i);
             if (item.kind == Objekt.variable) {
                 nextSymbol();
-                assign(fsys, lev, item);
+                varAssign(fsys, lev, item);
             } else if(item.kind == Objekt.array){
 //                if (currentSymbol == Symbol.lSquBra) {
 //                    nextSymbol();
@@ -555,17 +555,21 @@ public class Parser {
 //
 //                    if (currentSymbol == Symbol.rSquBra) {
 //                        nextSymbol();
-//                        assign(fsys, lev, item);
+//                        varAssign(fsys, lev, item);
 //                    } else {
 //                        Err.report(22);
 //                    }
 //                } else {
-//                    assign(fsys, lev, item);
+//                    varAssign(fsys, lev, item);
 //                }
                 nextSymbol();
-                int diff = getArrayDiff();
-                item = identTable.get(i - diff);
-                assign(fsys, lev, item);
+                if (getArrayDiff(fsys, lev)) {
+                    varAssign(fsys, lev, item);
+                } else {
+                    Table.Item clone = identTable.copyItem(item);
+                    clone.kind = Objekt.variable;
+                    varAssign(fsys, lev, clone);
+                }
             }else {
                 Err.report(12);                        // 赋值语句格式错误
             }
@@ -580,7 +584,7 @@ public class Parser {
      * @author: KanModel
      * @create: 2018/11/19 8:44
      */
-    void assign(SymSet fsys, int lev, Table.Item item){
+    void varAssign(SymSet fsys, int lev, Table.Item item){
         SymSet nxtlev;
 
         if (currentSymbol == Symbol.becomes) {
@@ -589,44 +593,88 @@ public class Parser {
             nxtlev = (SymSet) fsys.clone();
             parseExpression(nxtlev, lev);
             // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
-            interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
+            if (item.kind == Objekt.variable) {
+                interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
+            } else {
+                interpreter.generatePCode(Fct.STA, lev - item.level, item.adr);
+            }
         } else if(currentSymbol == Symbol.plusAssSym){
             nextSymbol();
 
             nxtlev = (SymSet) fsys.clone();
-            interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr);
+            if (item.kind == Objekt.variable) {
+                interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr);
+            } else {
+                interpreter.code[interpreter.cx] = interpreter.code[interpreter.cx - 1];
+                interpreter.cx++;
+                interpreter.generatePCode(Fct.LAD, lev - item.level, item.adr);
+            }
             parseExpression(nxtlev, lev);
             // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
             interpreter.generatePCode(Fct.OPR, 0, 2);
-            interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
+            if (item.kind == Objekt.variable) {
+                interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
+            } else {
+                interpreter.generatePCode(Fct.STA, lev - item.level, item.adr);
+            }
         } else if(currentSymbol == Symbol.minusAssSym){
             nextSymbol();
 
             nxtlev = (SymSet) fsys.clone();
-            interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr);
+            if (item.kind == Objekt.variable) {
+                interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr);
+            } else {
+                interpreter.code[interpreter.cx] = interpreter.code[interpreter.cx - 1];
+                interpreter.cx++;
+                interpreter.generatePCode(Fct.LAD, lev - item.level, item.adr);
+            }
             parseExpression(nxtlev, lev);
             // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
             interpreter.generatePCode(Fct.OPR, 0, 3);
-            interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
+            if (item.kind == Objekt.variable) {
+                interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
+            } else {
+                interpreter.generatePCode(Fct.STA, lev - item.level, item.adr);
+            }
         } else if(currentSymbol == Symbol.timesAssSym){
             nextSymbol();
 
             nxtlev = (SymSet) fsys.clone();
-            interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr);
+            if (item.kind == Objekt.variable) {
+                interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr);
+            } else {
+                interpreter.code[interpreter.cx] = interpreter.code[interpreter.cx - 1];
+                interpreter.cx++;
+                interpreter.generatePCode(Fct.LAD, lev - item.level, item.adr);
+            }
             parseExpression(nxtlev, lev);
             // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
             interpreter.generatePCode(Fct.OPR, 0, 4);
-            interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
+            if (item.kind == Objekt.variable) {
+                interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
+            } else {
+                interpreter.generatePCode(Fct.STA, lev - item.level, item.adr);
+            }
 
         } else if(currentSymbol == Symbol.slashAssSym){
             nextSymbol();
 
             nxtlev = (SymSet) fsys.clone();
-            interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr);
+            if (item.kind == Objekt.variable) {
+                interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr);
+            } else {
+                interpreter.code[interpreter.cx] = interpreter.code[interpreter.cx - 1];
+                interpreter.cx++;
+                interpreter.generatePCode(Fct.LAD, lev - item.level, item.adr);
+            }
             parseExpression(nxtlev, lev);
             // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
             interpreter.generatePCode(Fct.OPR, 0, 5);
-            interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
+            if (item.kind == Objekt.variable) {
+                interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
+            } else {
+                interpreter.generatePCode(Fct.STA, lev - item.level, item.adr);
+            }
         } else {
             Err.report(13);                // 没有检测到赋值符号
         }
@@ -634,27 +682,28 @@ public class Parser {
 
     /**
      * @description: 获取数组偏移量
-     * @return: int
+     * @return: boolean
      * @author: KanModel
      * @create: 2018/11/19 9:11
      */
-    int getArrayDiff(){
+    boolean getArrayDiff(SymSet fsys, int level){
         if (currentSymbol == Symbol.lSquBra) {
             nextSymbol();
-            if (currentSymbol == Symbol.number) {
-                nextSymbol();
-            } else {
-                Err.report(40);
-            }
+            parseExpression(fsys, level);
+//            if (currentSymbol == Symbol.number) {
+//                nextSymbol();
+//            } else {
+//                Err.report(40);
+//            }
 
             if (currentSymbol == Symbol.rSquBra) {
                 nextSymbol();
             } else {
                 Err.report(22);
             }
-            return scanner.num;
+            return true;
         } else {
-            return 0;
+            return false;
         }
     }
 
@@ -709,8 +758,13 @@ public class Parser {
             nxtlev.set(Symbol.plus);
             nxtlev.set(Symbol.minus);
 
-            parseTerm(nxtlev, lev);
+            if (currentSymbol == Symbol.sqrtSym) {
+                parseSqrtStatement(fsys, lev);
+            } else {
+                parseTerm(nxtlev, lev);
+            }
         }
+
 
         // 分析{<加法运算符><项>}
         while (currentSymbol == Symbol.plus || currentSymbol == Symbol.minus) {
@@ -784,8 +838,11 @@ public class Parser {
                             break;
                         case array:            // 名字为变量
                             nextSymbol();
-                            arrayDiff = getArrayDiff();
-                            interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr - arrayDiff);
+                            if (getArrayDiff(fsys, lev)) {
+                                interpreter.generatePCode(Fct.LAD, lev - item.level, item.adr);
+                            } else {
+                                interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr);
+                            }
                             break;
                         case procedure:            // 名字为过程
                             Err.report(21);                // 不能为过程
@@ -942,7 +999,7 @@ public class Parser {
             nextSymbol();
             nxtlev = (SymSet) fsys.clone();//后跟符号集的拷贝 用于传入表达式分析
             nxtlev.set(Symbol.rParen);//添加后跟符号 右括号
-            parseExpression(nxtlev, level);
+            parseFactor(nxtlev, level);
             interpreter.generatePCode(Fct.OPR, 0, 19);
 
             if (currentSymbol == Symbol.rParen) {
@@ -951,18 +1008,22 @@ public class Parser {
                 Err.report(33);
             }
 
-            int i = identTable.position(scanner.id);
-            if (i > 0) {
-                Table.Item item = identTable.get(i);
-                if (item.kind == Objekt.variable) {
-                    interpreter.generatePCode(Fct.STO, level - item.level, item.adr);//保存栈顶到变量值
-                } else if (item.kind == Objekt.array) {
-//                    getArrayDiff();
-                    interpreter.generatePCode(Fct.STO, level - item.level, item.adr - arrayDiff);//保存栈顶到变量值
-                }
-            } else {
-                Err.report(11);                            // 变量未找到
-            }
+//            int i = identTable.position(scanner.id);
+//            if (i > 0) {
+//                Table.Item item = identTable.get(i);
+//                if (item.kind == Objekt.variable) {
+//                    interpreter.generatePCode(Fct.STO, level - item.level, item.adr);//保存栈顶到变量值
+//                } else if (item.kind == Objekt.array) {
+////                    getArrayDiff();
+//                    if (getArrayDiff(fsys, level)) {
+//                        interpreter.generatePCode(Fct.STA, level - item.level, item.adr);
+//                    } else {
+//                        interpreter.generatePCode(Fct.STO, level - item.level, item.adr);
+//                    }
+//                }
+//            } else {
+//                Err.report(11);                            // 变量未找到
+//            }
         }
     }
 

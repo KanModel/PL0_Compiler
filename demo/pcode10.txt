@@ -1,0 +1,10 @@
+var a;
+array b[4];
+begin
+    a := 4;
+    while --a#-1 do
+        b[a] := a + 10;
+
+    while ++a#4 do
+        write(b[a]);
+end.
