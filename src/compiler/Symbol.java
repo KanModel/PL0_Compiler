@@ -16,6 +16,8 @@ public enum Symbol {
     comment, //×¢ÊÍ
     plusAssSym,
     minusAssSym,
+    timesAssSym,
+    slashAssSym,
     plusplus, //×ÔÔö·ûºÅ++
     minusminus //×Ô¼õ·ûºÅ--
 }

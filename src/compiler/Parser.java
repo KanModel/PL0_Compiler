@@ -553,6 +553,25 @@ public class Parser {
                     // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
                     interpreter.generatePCode(Fct.OPR, 0, 3);
                     interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
+                } else if(currentSymbol == Symbol.timesAssSym){
+                    nextSymbol();
+
+                    nxtlev = (SymSet) fsys.clone();
+                    interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr);
+                    parseExpression(nxtlev, lev);
+                    // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
+                    interpreter.generatePCode(Fct.OPR, 0, 4);
+                    interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
+
+                } else if(currentSymbol == Symbol.slashAssSym){
+                    nextSymbol();
+
+                    nxtlev = (SymSet) fsys.clone();
+                    interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr);
+                    parseExpression(nxtlev, lev);
+                    // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
+                    interpreter.generatePCode(Fct.OPR, 0, 5);
+                    interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
                 } else {
                     Err.report(13);                // 没有检测到赋值符号
                 }

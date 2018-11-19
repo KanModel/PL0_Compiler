@@ -275,6 +275,26 @@ public class Scanner {
                     currentSymbol = Symbol.minus;
                 }
                 break;
+            case '*':
+                getChar();
+                if (justReadChar == '=') {
+                    currentSymbol = Symbol.timesAssSym;
+                    getChar();
+                } else {
+                    //单个+号
+                    currentSymbol = Symbol.plus;
+                }
+                break;
+            case '/':
+                getChar();
+                if (justReadChar == '=') {
+                    currentSymbol = Symbol.slashAssSym;
+                    getChar();
+                } else {
+                    //单个+号
+                    currentSymbol = Symbol.plus;
+                }
+                break;
             default:        // 其他为单字符操作符（如果符号非法则返回nil）
                 currentSymbol = charTable[justReadChar];
                 if (currentSymbol != Symbol.period)
