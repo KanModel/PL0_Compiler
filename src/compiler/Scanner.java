@@ -94,27 +94,30 @@ public class Scanner {
         charTable['.'] = Symbol.period;
         charTable['#'] = Symbol.neq;
         charTable[';'] = Symbol.semicolon;
+        charTable['['] = Symbol.lSquBra;
+        charTable[']'] = Symbol.rSquBra;
 
         // 设置保留字名字,按照字母顺序，便于折半查找
-        keyword = new String[]{"begin", "call", "const", "do", "end", "if",
+        keyword = new String[]{"array", "begin", "call", "const", "do", "end", "if",
                 "odd", "procedure", "read", "sqrt", "then", "var", "while", "write"};
 
         // 设置保留字符号
         keywordTable = new Symbol[PL0.KEYWORD_COUNT];
-        keywordTable[0] = Symbol.beginSym;
-        keywordTable[1] = Symbol.callSym;
-        keywordTable[2] = Symbol.constSym;
-        keywordTable[3] = Symbol.doSym;
-        keywordTable[4] = Symbol.endSym;
-        keywordTable[5] = Symbol.ifSym;
-        keywordTable[6] = Symbol.oddSym;
-        keywordTable[7] = Symbol.procSym;
-        keywordTable[8] = Symbol.readSym;
-        keywordTable[9] = Symbol.sqrtSym;
-        keywordTable[10] = Symbol.thenSym;
-        keywordTable[11] = Symbol.varSym;
-        keywordTable[12] = Symbol.whileSym;
-        keywordTable[13] = Symbol.writeSym;
+        keywordTable[0] = Symbol.arraySym;
+        keywordTable[1] = Symbol.beginSym;
+        keywordTable[2] = Symbol.callSym;
+        keywordTable[3] = Symbol.constSym;
+        keywordTable[4] = Symbol.doSym;
+        keywordTable[5] = Symbol.endSym;
+        keywordTable[6] = Symbol.ifSym;
+        keywordTable[7] = Symbol.oddSym;
+        keywordTable[8] = Symbol.procSym;
+        keywordTable[9] = Symbol.readSym;
+        keywordTable[10] = Symbol.sqrtSym;
+        keywordTable[11] = Symbol.thenSym;
+        keywordTable[12] = Symbol.varSym;
+        keywordTable[13] = Symbol.whileSym;
+        keywordTable[14] = Symbol.writeSym;
     }
 
     /**
@@ -282,7 +285,7 @@ public class Scanner {
                     getChar();
                 } else {
                     //单个+号
-                    currentSymbol = Symbol.plus;
+                    currentSymbol = Symbol.times;
                 }
                 break;
             case '/':
@@ -292,7 +295,7 @@ public class Scanner {
                     getChar();
                 } else {
                     //单个+号
-                    currentSymbol = Symbol.plus;
+                    currentSymbol = Symbol.slash;
                 }
                 break;
             default:        // 其他为单字符操作符（如果符号非法则返回nil）

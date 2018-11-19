@@ -14,6 +14,9 @@ public enum Symbol {
     readSym, doSym, callSym, constSym, varSym, procSym,
     sqrtSym, //¿ª·½
     comment, //×¢ÊÍ
+    arraySym,
+    lSquBra,
+    rSquBra,
     plusAssSym,
     minusAssSym,
     timesAssSym,

@@ -4,7 +4,7 @@ package compiler;
  * 符号类型，为避免和Java的关键字Object冲突，我们改成Objekt
  */
 enum Objekt {
-    constant, variable, procedure
+    constant, variable, procedure, array
 }
 
 /**
@@ -74,6 +74,10 @@ public class Table {
                 item.level = level;
                 item.adr = dx;
                 break;
+            case array:                    // 变量名字
+                item.level = level;
+                item.adr = dx;
+                break;
             case procedure:                    // 过程名字
                 item.level = level;
                 break;
@@ -102,6 +106,9 @@ public class Table {
                     break;
                 case procedure:
                     msg = "    " + i + " proc  " + table[i].name + " lev=" + table[i].level + " addr=" + table[i].adr + " size=" + table[i].size;
+                    break;
+                case array:
+                    msg = "    " + i + " array  " + table[i].name + " lev=" + table[i].level + " addr=" + table[i].adr;
                     break;
             }
             System.out.println(msg);
