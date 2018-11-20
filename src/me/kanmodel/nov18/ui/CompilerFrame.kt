@@ -8,28 +8,21 @@ import java.io.*
 import javax.swing.*
 
 /**
- * Created with IntelliJ IDEA.
- * Description:
- * User: KanModel
- * Date: 2018-11-20-13:39
- */
-/**
  * @description: 编译器客户端
  * @author: KanModel
  * @create: 2018-11-20 13:39
  */
 class CompilerFrame : JFrame() {
-    private val jTextArea: JTextArea = JTextArea(10, 40)
-    private var jScrollPane: JScrollPane = JScrollPane(jTextArea)
+    private val editor = JTextPane()
+    private var jScrollPane: JScrollPane = JScrollPane(editor)
     private var open: FileDialog = FileDialog(this, "打开文档", FileDialog.LOAD)
     private var save: FileDialog = FileDialog(this, "保存文档", FileDialog.SAVE)
 
     init {
-        jTextArea.font = Font("Monospaced", 1, 20)
-        jTextArea.lineWrap = true//到达指定宽度则换行
+        initHighlightPane()
         jScrollPane.horizontalScrollBarPolicy = JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
         jScrollPane.verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
-        jScrollPane.setViewportView(jTextArea)
+        jScrollPane.setViewportView(editor)
 
         val menuBar = JMenuBar()//菜单栏
         val fileMenu = JMenu("文件")
@@ -79,9 +72,15 @@ class CompilerFrame : JFrame() {
 
         title = "PL0 Compiler"
         defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
-        size = Dimension(540, 270)
+        size = Dimension(800, 600)
         setLocationRelativeTo(null)
 //        isResizable = false
+    }
+
+    private fun initHighlightPane(){
+        editor.document.addDocumentListener(SyntaxHighlighter(editor))
+        editor.background = Color.black
+        editor.font = Font("Monospaced", 1, 20)
     }
 
     private fun compileFile(file: String?) {
@@ -144,7 +143,7 @@ class CompilerFrame : JFrame() {
         }
         file = File(dirPath, fileName)
 
-        jTextArea.text = ""//打开文件之前清空文本区域
+        editor.text = ""//打开文件之前清空文本区域
 
         try {
             val br = BufferedReader(FileReader(file))
@@ -153,7 +152,8 @@ class CompilerFrame : JFrame() {
             while (line != null) {
                 //将给定文本追加到文档结尾。如果模型为 null 或者字符串为 null 或空，则不执行任何操作。
                 //虽然大多数 Swing 方法不是线程安全的，但此方法是线程安全的。
-                jTextArea.append(line + "\r\n")
+//                jTextArea.append(line + "\r\n")
+                editor.text = editor.text + line + "\r\n"
                 line = br.readLine()
             }
         } catch (ex: IOException) {
@@ -178,7 +178,7 @@ class CompilerFrame : JFrame() {
     private fun saveFile() {
         try {
             val bw = BufferedWriter(FileWriter(file))
-            val text = jTextArea.text
+            val text = editor.text
             bw.write(text)
             bw.close()
         } catch (ex: IOException) {
