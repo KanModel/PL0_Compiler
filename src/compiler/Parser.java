@@ -973,7 +973,7 @@ public class Parser {
             nextSymbol();
             nxtlev = (SymSet) fsys.clone();//后跟符号集的拷贝 用于传入表达式分析
             nxtlev.set(Symbol.rParen);//添加后跟符号 右括号
-            parseFactor(nxtlev, level);
+            parseExpression(nxtlev, level);
             interpreter.generatePCode(Fct.OPR, 0, 19);
 
             if (currentSymbol == Symbol.rParen) {
