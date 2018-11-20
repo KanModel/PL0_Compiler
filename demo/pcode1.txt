@@ -1,5 +1,5 @@
 const a=10; {comment}
-var b,c;{comment}
+var b,c;
 procedure p;{comment}
     begin{comment}
         c:=b+a{comment}

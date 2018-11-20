@@ -16,7 +16,7 @@ begin
         c := a * b;
         c := +(a * a);
         call pp;
-        c--;
+        --c;
         write(a);
         write(c);
 
