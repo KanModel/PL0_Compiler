@@ -64,6 +64,7 @@ public class Parser {
         factorBeginSet.set(Symbol.ident);
         factorBeginSet.set(Symbol.number);
         factorBeginSet.set(Symbol.lParen);
+        factorBeginSet.set(Symbol.sqrtSym);
 
     }
 
@@ -726,12 +727,14 @@ public class Parser {
             nxtlev.set(Symbol.minusminus);
             nxtlev.set(Symbol.plus);
             nxtlev.set(Symbol.minus);
+            nxtlev.set(Symbol.sqrtSym);
 
-            if (currentSymbol == Symbol.sqrtSym) {
-                parseSqrtStatement(fsys, lev);
-            } else {
-                parseTerm(nxtlev, lev);
-            }
+            parseTerm(nxtlev, lev);
+//            if (currentSymbol == Symbol.sqrtSym) {
+//                parseSqrtStatement(fsys, lev);
+//            } else {
+//                parseTerm(nxtlev, lev);
+//            }
         }
 
 
@@ -830,6 +833,8 @@ public class Parser {
                 }
                 interpreter.generatePCode(Fct.LIT, 0, num);
                 nextSymbol();
+            } else if (currentSymbol == Symbol.sqrtSym) {
+                parseSqrtStatement(fsys, lev);
             } else if (currentSymbol == Symbol.lParen) {    // 因子为表达式
                 nextSymbol();
                 nxtlev = (SymSet) fsys.clone();
@@ -908,7 +913,7 @@ public class Parser {
      *
      * @author: KanModel
      */
-    void isComment() {
+    private void isComment() {
         while (currentSymbol == Symbol.comment) {
             nextSymbol();
         }
@@ -976,23 +981,6 @@ public class Parser {
             } else {
                 Err.report(33);
             }
-
-//            int i = identTable.position(scanner.id);
-//            if (i > 0) {
-//                Table.Item item = identTable.get(i);
-//                if (item.kind == Objekt.variable) {
-//                    interpreter.generatePCode(Fct.STO, level - item.level, item.adr);//保存栈顶到变量值
-//                } else if (item.kind == Objekt.array) {
-////                    getArrayDiff();
-//                    if (getArrayDiff(fsys, level)) {
-//                        interpreter.generatePCode(Fct.STA, level - item.level, item.adr);
-//                    } else {
-//                        interpreter.generatePCode(Fct.STO, level - item.level, item.adr);
-//                    }
-//                }
-//            } else {
-//                Err.report(11);                            // 变量未找到
-//            }
         }
     }
 
@@ -1001,7 +989,7 @@ public class Parser {
      *
      * @param level 当前层次
      */
-    void parseArrayDeclaration(int level) {
+    private void parseArrayDeclaration(int level) {
         if (currentSymbol == Symbol.ident) {
             // 填写名字表并改变堆栈帧计数器
             nextSymbol();
