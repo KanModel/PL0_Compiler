@@ -1,5 +1,7 @@
 package compiler;
 
+import compiler.error.Err;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 

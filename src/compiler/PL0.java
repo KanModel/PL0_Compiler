@@ -1,5 +1,8 @@
 package compiler;
 
+import compiler.error.Err;
+import compiler.error.ErrorReason;
+
 import java.io.*;
 
 /**
@@ -55,7 +58,7 @@ public class PL0 {
 	 * 执行编译动作
 	 * @return 是否编译成功
 	 */
-	boolean compile() {
+	public boolean compile() {
 		boolean abort = false;
 		
 		try {

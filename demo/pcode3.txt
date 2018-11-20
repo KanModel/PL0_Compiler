@@ -2,7 +2,7 @@ var a;
 begin
     a := 10;
     {if odd 3 then}
-    write(--6, 3);
+    write(6, 3);
     while a#0 do
     begin
         write(a);
