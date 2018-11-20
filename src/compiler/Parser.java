@@ -324,10 +324,10 @@ public class Parser {
             case whileSym:
                 parseWhileStatement(fsys, level);
                 break;
-            case plusplus://todo
+            case plusplus:
                 parsePlusMinusAssign(fsys, level);
                 break;
-            case minusminus://todo
+            case minusminus:
                 parsePlusMinusAssign(fsys, level);
                 break;
             case sqrtSym:
@@ -521,8 +521,6 @@ public class Parser {
         if (currentSymbol == Symbol.rParen) {
             nextSymbol();
 
-//            isComment();
-
         } else {
             Err.report(33);                    // 格式错误，应是右括号
             while (!fsys.get(currentSymbol))
@@ -542,35 +540,17 @@ public class Parser {
             Table.Item item = identTable.get(i);
             if (item.kind == Objekt.variable) {
                 nextSymbol();
-                varAssign(fsys, lev, item);
-            } else if(item.kind == Objekt.array){
-//                if (currentSymbol == Symbol.lSquBra) {
-//                    nextSymbol();
-//                    if (currentSymbol == Symbol.number) {
-//                        nextSymbol();
-//                        item = identTable.get(i - scanner.num);
-//                    } else {
-//                        Err.report(40);
-//                    }
-//
-//                    if (currentSymbol == Symbol.rSquBra) {
-//                        nextSymbol();
-//                        varAssign(fsys, lev, item);
-//                    } else {
-//                        Err.report(22);
-//                    }
-//                } else {
-//                    varAssign(fsys, lev, item);
-//                }
+                assign(fsys, lev, item);
+            } else if (item.kind == Objekt.array) {
                 nextSymbol();
                 if (getArrayDiff(fsys, lev)) {
-                    varAssign(fsys, lev, item);
+                    assign(fsys, lev, item);
                 } else {
                     Table.Item clone = identTable.copyItem(item);
                     clone.kind = Objekt.variable;
-                    varAssign(fsys, lev, clone);
+                    assign(fsys, lev, clone);
                 }
-            }else {
+            } else {
                 Err.report(12);                        // 赋值语句格式错误
             }
         } else {
@@ -584,7 +564,7 @@ public class Parser {
      * @author: KanModel
      * @create: 2018/11/19 8:44
      */
-    void varAssign(SymSet fsys, int lev, Table.Item item){
+    void assign(SymSet fsys, int lev, Table.Item item) {
         SymSet nxtlev;
 
         if (currentSymbol == Symbol.becomes) {
@@ -593,90 +573,77 @@ public class Parser {
             nxtlev = (SymSet) fsys.clone();
             parseExpression(nxtlev, lev);
             // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
-            if (item.kind == Objekt.variable) {
-                interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
-            } else {
-                interpreter.generatePCode(Fct.STA, lev - item.level, item.adr);
-            }
-        } else if(currentSymbol == Symbol.plusAssSym){
+            storeVar(lev, item);
+        } else if (currentSymbol == Symbol.plusAssSym) {
             nextSymbol();
 
             nxtlev = (SymSet) fsys.clone();
-            if (item.kind == Objekt.variable) {
-                interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr);
-            } else {
-                interpreter.code[interpreter.cx] = interpreter.code[interpreter.cx - 1];
-                interpreter.cx++;
-                interpreter.generatePCode(Fct.LAD, lev - item.level, item.adr);
-            }
+            loadVar(lev, item);
             parseExpression(nxtlev, lev);
             // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
             interpreter.generatePCode(Fct.OPR, 0, 2);
-            if (item.kind == Objekt.variable) {
-                interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
-            } else {
-                interpreter.generatePCode(Fct.STA, lev - item.level, item.adr);
-            }
-        } else if(currentSymbol == Symbol.minusAssSym){
+            storeVar(lev, item);
+        } else if (currentSymbol == Symbol.minusAssSym) {
             nextSymbol();
 
             nxtlev = (SymSet) fsys.clone();
-            if (item.kind == Objekt.variable) {
-                interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr);
-            } else {
-                interpreter.code[interpreter.cx] = interpreter.code[interpreter.cx - 1];
-                interpreter.cx++;
-                interpreter.generatePCode(Fct.LAD, lev - item.level, item.adr);
-            }
+            loadVar(lev, item);
             parseExpression(nxtlev, lev);
             // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
             interpreter.generatePCode(Fct.OPR, 0, 3);
-            if (item.kind == Objekt.variable) {
-                interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
-            } else {
-                interpreter.generatePCode(Fct.STA, lev - item.level, item.adr);
-            }
-        } else if(currentSymbol == Symbol.timesAssSym){
+            storeVar(lev, item);
+        } else if (currentSymbol == Symbol.timesAssSym) {
             nextSymbol();
 
             nxtlev = (SymSet) fsys.clone();
-            if (item.kind == Objekt.variable) {
-                interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr);
-            } else {
-                interpreter.code[interpreter.cx] = interpreter.code[interpreter.cx - 1];
-                interpreter.cx++;
-                interpreter.generatePCode(Fct.LAD, lev - item.level, item.adr);
-            }
+            loadVar(lev, item);
             parseExpression(nxtlev, lev);
             // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
             interpreter.generatePCode(Fct.OPR, 0, 4);
-            if (item.kind == Objekt.variable) {
-                interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
-            } else {
-                interpreter.generatePCode(Fct.STA, lev - item.level, item.adr);
-            }
-
-        } else if(currentSymbol == Symbol.slashAssSym){
+            storeVar(lev, item);
+        } else if (currentSymbol == Symbol.slashAssSym) {
             nextSymbol();
 
             nxtlev = (SymSet) fsys.clone();
-            if (item.kind == Objekt.variable) {
-                interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr);
-            } else {
-                interpreter.code[interpreter.cx] = interpreter.code[interpreter.cx - 1];
-                interpreter.cx++;
-                interpreter.generatePCode(Fct.LAD, lev - item.level, item.adr);
-            }
+            loadVar(lev, item);
             parseExpression(nxtlev, lev);
             // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
             interpreter.generatePCode(Fct.OPR, 0, 5);
-            if (item.kind == Objekt.variable) {
-                interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
-            } else {
-                interpreter.generatePCode(Fct.STA, lev - item.level, item.adr);
-            }
+            storeVar(lev, item);
         } else {
             Err.report(13);                // 没有检测到赋值符号
+        }
+    }
+
+    /**
+     * @description: 加载对应数据到栈顶
+     * @param: [lev, item]
+     * @return: void
+     * @author: KanModel
+     * @create: 2018/11/20 13:35
+     */
+    private void loadVar(int lev, Table.Item item) {
+        if (item.kind == Objekt.variable) {
+            interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr);
+        } else {
+            interpreter.code[interpreter.cx] = interpreter.code[interpreter.cx - 1];
+            interpreter.cx++;
+            interpreter.generatePCode(Fct.LAD, lev - item.level, item.adr);
+        }
+    }
+
+    /**
+     * @description: 保存栈顶数据到对应变量
+     * @param: [lev, item]
+     * @return: void
+     * @author: KanModel
+     * @create: 2018/11/20 13:34
+     */
+    private void storeVar(int lev, Table.Item item) {
+        if (item.kind == Objekt.variable) {
+            interpreter.generatePCode(Fct.STO, lev - item.level, item.adr);
+        } else {
+            interpreter.generatePCode(Fct.STA, lev - item.level, item.adr);
         }
     }
 
@@ -686,7 +653,7 @@ public class Parser {
      * @author: KanModel
      * @create: 2018/11/19 9:11
      */
-    boolean getArrayDiff(SymSet fsys, int level){
+    boolean getArrayDiff(SymSet fsys, int level) {
         if (currentSymbol == Symbol.lSquBra) {
             nextSymbol();
             parseExpression(fsys, level);
