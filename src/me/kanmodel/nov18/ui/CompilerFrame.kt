@@ -14,7 +14,7 @@ import javax.swing.*
  * Date: 2018-11-20-13:39
  */
 /**
- * @description: todo
+ * @description: 编译器客户端
  * @author: KanModel
  * @create: 2018-11-20 13:39
  */
@@ -41,6 +41,7 @@ class CompilerFrame : JFrame() {
         val aboutItem = JMenuItem("关于")
         val compileItem = JMenuItem("编译")
         val runItem = JMenuItem("运行")
+        val compileAndRunItem = JMenuItem("编译&运行")
         menuBar.add(fileMenu)
         menuBar.add(projectMenu)
         menuBar.add(helpMenu)
@@ -49,9 +50,10 @@ class CompilerFrame : JFrame() {
         fileMenu.add(closeItem)
         projectMenu.add(compileItem)
         projectMenu.add(runItem)
+        projectMenu.add(compileAndRunItem)
         helpMenu.add(aboutItem)
         openItem.addActionListener {
-            showFileOpenDialog(this)
+            showFileOpenDialog()
         }
         saveItem.addActionListener {
             if (file == null) {
@@ -65,8 +67,12 @@ class CompilerFrame : JFrame() {
         runItem.addActionListener {
             run()
         }
+        compileAndRunItem.addActionListener {
+            compileFile(fileString)
+            run()
+        }
         closeItem.addActionListener { System.exit(0) }
-
+        aboutItem.addActionListener { JOptionPane.showMessageDialog(null, "PL0 编译器客户端") }
 
         add(menuBar, BorderLayout.NORTH)
         add(jScrollPane, BorderLayout.CENTER)
@@ -78,9 +84,13 @@ class CompilerFrame : JFrame() {
 //        isResizable = false
     }
 
-    private fun compileFile(file: String) {
+    private fun compileFile(file: String?) {
         ErrorReason.init()
 
+        if (file == null) {
+            JOptionPane.showMessageDialog(frame, "请先打开文件!", "警告", JOptionPane.WARNING_MESSAGE)
+            return
+        }
         PL0.stdin = BufferedReader(InputStreamReader(System.`in`))
         val fin: BufferedReader
         try {
@@ -121,24 +131,7 @@ class CompilerFrame : JFrame() {
         }
     }
 
-    private fun showFileOpenDialog(parent: Component) {
-        /*val fileChooser = JFileChooser()
-
-        fileChooser.currentDirectory = File(".")
-
-        fileChooser.fileSelectionMode = JFileChooser.FILES_AND_DIRECTORIES
-        fileChooser.isMultiSelectionEnabled = false
-
-        val result = fileChooser.showOpenDialog(parent)
-
-        if (result == JFileChooser.APPROVE_OPTION) {
-            isCompileSuccess = false
-            file = fileChooser.selectedFile
-            val selectedFile = fileChooser.selectedFile
-            fileString = selectedFile.absolutePath
-            println(selectedFile.absolutePath)
-            println(selectedFile.parentFile)
-        }*/
+    private fun showFileOpenDialog() {
         open.isVisible = true
 
         val dirPath = open.directory
@@ -196,7 +189,7 @@ class CompilerFrame : JFrame() {
     companion object {
         private var file: File? = null
         var isCompileSuccess = false
-        lateinit var fileString: String
+        var fileString: String? = null
         val frame = CompilerFrame()
 
 
