@@ -12,6 +12,7 @@ public enum Symbol {
     becomes, //¸³Öµ:=
     beginSym, endSym, ifSym, thenSym, whileSym, writeSym,
     readSym, doSym, callSym, constSym, varSym, procSym,
+    elseSym,
     sqrtSym, //¿ª·½
     comment, //×¢ÊÍ
     arraySym,

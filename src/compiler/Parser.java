@@ -28,8 +28,6 @@ public class Parser {
      */
     private int dataSize = 0;
 
-    private int arrayDiff = 0;
-
     /**
      * 构造并初始化语法分析器，这里包含了C语言版本中init()函数的一部分代码
      *
@@ -418,6 +416,7 @@ public class Parser {
         nxtlev = (SymSet) fsys.clone();
         nxtlev.set(Symbol.thenSym);                // 后跟符号为then或do ???
         nxtlev.set(Symbol.doSym);
+        nxtlev.set(Symbol.elseSym);
         parseCondition(nxtlev, lev);            // 分析<条件>
         if (currentSymbol == Symbol.thenSym)
             nextSymbol();
@@ -428,6 +427,19 @@ public class Parser {
         parseStatement(fsys, lev);                // 处理then后的语句
         interpreter.code[cx1].a = interpreter.cx;            // 经statement处理后，cx为then后语句执行
         // 完的位置，它正是前面未定的跳转地址
+        if (currentSymbol == Symbol.semicolon) {
+            nextSymbol();
+            if (currentSymbol == Symbol.elseSym) {
+                nextSymbol();
+                int cx2 = interpreter.cx;
+                interpreter.generatePCode(Fct.JMP, 0, 0);
+                parseStatement(fsys, lev);
+                interpreter.code[cx2].a = interpreter.cx;
+                interpreter.code[cx1].a++;
+            } else {
+                parseStatement(fsys, lev);
+            }
+        }
     }
 
     /**
