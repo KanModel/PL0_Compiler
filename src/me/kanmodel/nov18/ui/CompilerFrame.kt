@@ -56,14 +56,20 @@ class CompilerFrame : JFrame() {
             saveFile()
         }
         compileItem.addActionListener {
-            compileFile(fileString)
+            Thread{
+                compileFile(fileString)
+            }.start()
         }
         runItem.addActionListener {
-            run()
+            Thread{
+                run()
+            }.start()
         }
         compileAndRunItem.addActionListener {
-            compileFile(fileString)
-            run()
+            Thread{
+                compileFile(fileString)
+                run()
+            }.start()
         }
         closeItem.addActionListener { System.exit(0) }
         aboutItem.addActionListener { JOptionPane.showMessageDialog(null, "PL0 ±àÒëÆ÷¿Í»§¶Ë") }
@@ -78,7 +84,7 @@ class CompilerFrame : JFrame() {
 //        isResizable = false
     }
 
-    private fun initHighlightPane(){
+    private fun initHighlightPane() {
         editor.document.addDocumentListener(SyntaxHighlighter(editor))
         editor.background = Color.black
         editor.font = Font("Monospaced", 1, 20)
@@ -197,7 +203,9 @@ class CompilerFrame : JFrame() {
 
         @JvmStatic
         fun main(args: Array<String>) {
-            frame.isVisible = true
+            SwingUtilities.invokeLater {
+                frame.isVisible = true
+            }
         }
     }
 }

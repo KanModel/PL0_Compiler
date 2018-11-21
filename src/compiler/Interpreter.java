@@ -163,8 +163,8 @@ public class Interpreter {
                             PL0.resultPrintStream.println();
                             break;
                         case 16:
-                            System.out.print("?");
-                            PL0.resultPrintStream.print("?");
+                            System.out.print("Input:");
+                            PL0.resultPrintStream.print("Input:");
                             s[t] = 0;
                             try {
                                 s[t] = Integer.parseInt(PL0.stdin.readLine());
