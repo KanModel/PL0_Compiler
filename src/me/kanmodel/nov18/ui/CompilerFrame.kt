@@ -47,7 +47,7 @@ class CompilerFrame : JFrame() {
         projectMenu.add(compileAndRunItem)
         helpMenu.add(aboutItem)
         openItem.addActionListener {
-            showFileOpenDialog()
+            openFile()
         }
         saveItem.addActionListener {
             if (file == null) {
@@ -77,7 +77,7 @@ class CompilerFrame : JFrame() {
         add(menuBar, BorderLayout.NORTH)
         add(jScrollPane, BorderLayout.CENTER)
 
-        title = "PL0 Compiler"
+        title = "new$titleName"
         defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
         size = Dimension(800, 600)
         setLocationRelativeTo(null)
@@ -137,17 +137,17 @@ class CompilerFrame : JFrame() {
         }
     }
 
-    private fun showFileOpenDialog() {
+    private fun openFile() {
         open.isVisible = true
 
         val dirPath = open.directory
         val fileName = open.file
-        fileString = dirPath + fileName
-        println(dirPath)
-        println(fileName)
         if (dirPath == null || fileName == null) {
             return
         }
+        fileString = dirPath + fileName
+        println("打开文件: $fileString")
+        frame.title = "$fileString$titleName"
         file = File(dirPath, fileName)
 
         editor.text = ""//打开文件之前清空文本区域
@@ -175,6 +175,7 @@ class CompilerFrame : JFrame() {
             val dirPath = save.directory
             val fileName = save.file
             fileString = dirPath + fileName
+            frame.title = "$fileString$titleName"
             if (dirPath == null || fileName == null) {
                 return
             }
@@ -195,11 +196,13 @@ class CompilerFrame : JFrame() {
     }
 
     companion object {
+        const val titleName = " - PL0 Compiler"
         private var file: File? = null
         var isCompileSuccess = false
         var fileString: String? = null
-        val frame = CompilerFrame()
 
+
+        val frame = CompilerFrame()
 
         @JvmStatic
         fun main(args: Array<String>) {
