@@ -24,14 +24,19 @@ import javax.swing.text.*
 class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
     private val keywords: MutableSet<String>
     private val operators: MutableSet<String>
+    private val symbol: MutableSet<Char>
     private val keywordStyle: Style = (editor.document as StyledDocument).addStyle("Keyword_Style", null)
     private val operatorStyle: Style = (editor.document as StyledDocument).addStyle("Operator_Style", null)
+    private val symbolStyle: Style = (editor.document as StyledDocument).addStyle("Symbol_Style", null)
+    private val commentStyle: Style = (editor.document as StyledDocument).addStyle("Comment_Style", null)
     private val normalStyle: Style = (editor.document as StyledDocument).addStyle("Normal_Style", null)
 
     init {
         // 准备着色使用的样式
         StyleConstants.setForeground(keywordStyle, Color.ORANGE)
         StyleConstants.setForeground(operatorStyle, Color.CYAN)
+        StyleConstants.setForeground(symbolStyle, Color.GREEN)
+        StyleConstants.setForeground(commentStyle, Color.GRAY)
         StyleConstants.setForeground(normalStyle, Color.WHITE)
 
         // 准备关键字
@@ -39,6 +44,7 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
         keywords.add("begin")
         keywords.add("end")
         keywords.add("if")
+        keywords.add("else")
         keywords.add("then")
         keywords.add("while")
         keywords.add("do")
@@ -52,6 +58,17 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
         operators.add("sqrt")
         operators.add("write")
         operators.add("read")
+
+        symbol = HashSet()
+        symbol.add(':')
+        symbol.add(';')
+        symbol.add('=')
+        symbol.add('+')
+        symbol.add('-')
+        symbol.add('*')
+        symbol.add('/')
+        symbol.add('.')
+        symbol.add(',')
     }
 
     @Throws(BadLocationException::class)
@@ -69,6 +86,11 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
                 // 如果是以字母或者下划线开头, 说明是单词
                 // pos为处理后的最后一个下标
                 start = colouringWord(doc, start)
+            } else if (ch == '{' || ch == '}') {
+                start = colouringComment(doc, start)
+            } else if (symbol.contains(ch)){
+                SwingUtilities.invokeLater(ColouringTask(doc, start, 1, symbolStyle))
+                ++start
             } else {
                 SwingUtilities.invokeLater(ColouringTask(doc, start, 1, normalStyle))
                 ++start
@@ -99,6 +121,22 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
             else -> SwingUtilities.invokeLater(ColouringTask(doc, pos, wordEnd - pos, normalStyle))
         }
 
+        return wordEnd
+    }
+
+    /**
+     * 对单词进行着色, 并返回单词结束的下标.
+     *
+     * @param doc
+     * @param pos
+     * @return
+     * @throws BadLocationException
+     */
+    @Throws(BadLocationException::class)
+    fun colouringComment(doc: StyledDocument, pos: Int): Int {
+        val wordEnd = indexOfCommentEnd(doc, pos)
+
+        SwingUtilities.invokeLater(ColouringTask(doc, pos, wordEnd - pos, commentStyle))
         return wordEnd
     }
 
@@ -150,10 +188,29 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
     fun indexOfWordEnd(doc: Document, pos: Int): Int {
         var pos = pos
         // 从pos开始向前找到第一个非单词字符.
-        while (isWordCharacter(doc, pos)) {
+        while (isWordCharacter(doc, pos) && pos < doc.length) {
             ++pos
         }
 
+        return pos
+    }
+
+    /**
+     * 取得下标为pos时, 它所在的单词结束的下标. ?±wor^d?± (^表示pos, ?±表示开始或结束的下标)
+     *
+     * @param doc
+     * @param pos
+     * @return
+     * @throws BadLocationException
+     */
+    @Throws(BadLocationException::class)
+    fun indexOfCommentEnd(doc: Document, pos: Int): Int {
+        var pos = pos
+        // 从pos开始向前找到第一个非单词字符.
+        while (isCommentCharacter(doc, pos) && pos < doc.length) {
+            ++pos
+        }
+        pos++
         return pos
     }
 
@@ -168,7 +225,22 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
     @Throws(BadLocationException::class)
     fun isWordCharacter(doc: Document, pos: Int): Boolean {
         val ch = getCharAt(doc, pos)
+//        return Character.isLetter(ch) || Character.isDigit(ch) || ch == '_' || ch == '{' || ch == '}'
         return Character.isLetter(ch) || Character.isDigit(ch) || ch == '_'
+    }
+
+    /**
+     * 如果一个字符是字母, 数字, 下划线, 则返回true.
+     *
+     * @param doc
+     * @param pos
+     * @return
+     * @throws BadLocationException
+     */
+    @Throws(BadLocationException::class)
+    fun isCommentCharacter(doc: Document, pos: Int): Boolean {
+        val ch = getCharAt(doc, pos)
+        return ch != '}' && ch != '\n'
     }
 
     override fun changedUpdate(e: DocumentEvent) {

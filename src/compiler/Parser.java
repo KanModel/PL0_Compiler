@@ -118,7 +118,7 @@ public class Parser {
      * @param level 当前分程序所在层
      * @param fsys  当前模块后跟符号集
      */
-    public void parseBlock(int level, SymSet fsys) {
+    private void parseBlock(int level, SymSet fsys) {
         // <分程序> := [<常量说明部分>][<变量说明部分>][<过程说明部分>]<语句>
 
         int dx0, tx0, cx0;                // 保留初始dx，tx和cx
@@ -256,7 +256,7 @@ public class Parser {
      *
      * @param level 当前所在的层次
      */
-    void parseConstDeclaration(int level) {
+    private void parseConstDeclaration(int level) {
         if (currentSymbol == Symbol.ident) {
             nextSymbol();
             if (currentSymbol == Symbol.equal || currentSymbol == Symbol.becomes) {
@@ -282,7 +282,7 @@ public class Parser {
      *
      * @param level 当前层次
      */
-    void parseVarDeclaration(int level) {
+    private void parseVarDeclaration(int level) {
         if (currentSymbol == Symbol.ident) {
             // 填写名字表并改变堆栈帧计数器
             identTable.enter(Objekt.variable, level, dataSize);
@@ -299,7 +299,7 @@ public class Parser {
      * @param fsys  后跟符号集
      * @param level 当前层次
      */
-    void parseStatement(SymSet fsys, int level) {
+    private void parseStatement(SymSet fsys, int level) {
         SymSet nxtlev;
         // Wirth 的 PL/0 编译器使用一系列的if...else...来处理
         // 但是你的助教认为下面的写法能够更加清楚地看出这个函数的处理逻辑
@@ -394,9 +394,6 @@ public class Parser {
         }
         if (currentSymbol == Symbol.endSym) {
             nextSymbol();
-
-//            isComment();
-
         } else {
             Err.report(17);                        // 缺少end或分号
         }
@@ -579,7 +576,7 @@ public class Parser {
      * @author: KanModel
      * @create: 2018/11/19 8:44
      */
-    void assign(SymSet fsys, int lev, Table.Item item) {
+    private void assign(SymSet fsys, int lev, Table.Item item) {
         SymSet nxtlev;
 
         if (currentSymbol == Symbol.becomes) {
