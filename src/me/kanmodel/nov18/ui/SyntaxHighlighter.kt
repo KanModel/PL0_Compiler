@@ -86,8 +86,8 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
                 // 如果是以字母或者下划线开头, 说明是单词
                 // pos为处理后的最后一个下标
                 start = colouringWord(doc, start)
-            } else if (ch == '{' || ch == '}') {
-                start = colouringComment(doc, start)
+//            } else if (ch == '{' || ch == '}') {
+//                start = colouringComment(doc, start)
             } else if (symbol.contains(ch)){
                 SwingUtilities.invokeLater(ColouringTask(doc, start, 1, symbolStyle))
                 ++start
@@ -206,7 +206,7 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
     @Throws(BadLocationException::class)
     fun indexOfCommentEnd(doc: Document, pos: Int): Int {
         var pos = pos
-        // 从pos开始向前找到第一个非单词字符.
+        // 从pos开始向前找到第一个注释终结符.
         while (isCommentCharacter(doc, pos) && pos < doc.length) {
             ++pos
         }
@@ -240,7 +240,7 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
     @Throws(BadLocationException::class)
     fun isCommentCharacter(doc: Document, pos: Int): Boolean {
         val ch = getCharAt(doc, pos)
-        return ch != '}' && ch != '\n'
+        return ch != '}'
     }
 
     override fun changedUpdate(e: DocumentEvent) {
