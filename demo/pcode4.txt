@@ -1,9 +1,9 @@
 var a, b;
 begin
     {a := 11 + 1;
-    a := a + 1;
-    write(++a);}
-    a := 11;
+	a := a + 1;
+	write(++a);}
+	a := 11;
     b := ++a + 1;
     ++b;
     ++a;

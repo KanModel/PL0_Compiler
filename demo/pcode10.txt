@@ -3,7 +3,9 @@ array b[4];
 begin
     a := 4;
     while --a#-1 do
+    begin
         b[a] := a + 10;
+    end;
 
     while ++a#4 do
         write(b[a]);

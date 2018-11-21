@@ -17,29 +17,10 @@ import javax.swing.text.*
  * Date: 2018-11-20-18:14
  */
 /**
- * @description: todo
+ * @description: ∏ﬂ¡¡‰÷»æ¿‡
  * @author: KanModel
  * @create: 2018-11-20 18:14
  */
-class HighlightFrame {
-    companion object {
-        @JvmStatic
-        fun main(args: Array<String>) {
-            val frame = JFrame("TEST")
-
-            val editor = JTextPane()
-            editor.document.addDocumentListener(SyntaxHighlighter(editor))
-            editor.background = Color.black
-            editor.font = Font("Monospaced", 1, 20)
-            frame.contentPane.add(editor)
-
-            frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
-            frame.setSize(500, 500)
-            frame.isVisible = true
-        }
-    }
-}
-
 class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
     private val keywords: MutableSet<String>
     private val operators: MutableSet<String>
@@ -227,6 +208,23 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
             } catch (e: Exception) {
             }
 
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        fun main(args: Array<String>) {
+            val frame = JFrame("TEST")
+
+            val editor = JTextPane()
+            editor.document.addDocumentListener(SyntaxHighlighter(editor))
+            editor.background = Color.black
+            editor.font = Font("Monospaced", 1, 20)
+            frame.contentPane.add(editor)
+
+            frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
+            frame.setSize(500, 500)
+            frame.isVisible = true
         }
     }
 }

@@ -6,6 +6,7 @@ import compiler.PL0
 import java.awt.*
 import java.io.*
 import javax.swing.*
+import javax.swing.JTextPane
 
 /**
  * @description: ±àÒëÆ÷¿Í»§¶Ë
@@ -167,6 +168,7 @@ class CompilerFrame : JFrame() {
             save.isVisible = true
             val dirPath = save.directory
             val fileName = save.file
+            fileString = dirPath + fileName
             if (dirPath == null || fileName == null) {
                 return
             }
