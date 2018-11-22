@@ -91,6 +91,10 @@ class CompilerFrame : JFrame() {
     }
 
     private fun compileFile(file: String?) {
+        if (Companion.file == null) {
+            newFile()
+        }
+        saveFile()//œ»±£¥Ê∫Û±‡“Î
         ErrorReason.init()
 
         if (file == null) {

@@ -1,0 +1,6 @@
+begin
+	write('a' + 100);
+	print('a');
+	print('h','e','l','l','o',' ','w','o','r','l','d');
+	print("hello world", " 233", 'k', ''');
+end.

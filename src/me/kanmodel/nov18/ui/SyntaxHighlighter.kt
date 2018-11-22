@@ -70,6 +70,8 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
         symbol.add('/')
         symbol.add('.')
         symbol.add(',')
+        symbol.add('\'')
+        symbol.add('"')
     }
 
     @Throws(BadLocationException::class)

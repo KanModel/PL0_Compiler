@@ -4,6 +4,7 @@ import compiler.error.Err;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * 　　词法分析器负责的工作是从源代码里面读取文法符号，这是PL/0编译器的主要组成部分之一。
@@ -73,6 +74,11 @@ public class Scanner {
      * @see Table#enter
      */
     public int num;
+
+    /**
+     * 字符串存储
+     */
+    public ArrayList<Integer> strList = new ArrayList<>();
 
     /**
      * 初始化词法分析器
@@ -166,6 +172,9 @@ public class Scanner {
         } else if (justReadChar == '\'') {
             // 字符
             matchChar();
+        } else if (justReadChar == '"') {
+            // 字符串
+            matchString();
         } else {
             // 操作符
             matchOperator();
@@ -323,6 +332,21 @@ public class Scanner {
         getChar();
         if (justReadChar != '\'') {
             Err.report(41);
+        }
+        getChar();
+    }
+
+    /**
+     * 分析字符
+     */
+    private void matchString() {
+        strList.clear();
+        currentSymbol = Symbol.string;
+
+        getChar();
+        while (justReadChar != '"') {
+            strList.add((int) justReadChar);
+            getChar();
         }
         getChar();
     }

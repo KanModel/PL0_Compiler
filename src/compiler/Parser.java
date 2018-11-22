@@ -1042,8 +1042,16 @@ public class Parser {
                 nxtlev = (SymSet) fsys.clone();//后跟符号集的拷贝 用于传入表达式分析
                 nxtlev.set(Symbol.rParen);//添加后跟符号 右括号
                 nxtlev.set(Symbol.comma);//添加后跟符号 逗号
-                parseExpression(nxtlev, level);
-                interpreter.generatePCode(Fct.OPR, 0, 20);
+                if (currentSymbol == Symbol.string) {
+                    for (int i = 0; i < scanner.strList.size(); i++) {
+                        interpreter.generatePCode(Fct.LIT, 0, scanner.strList.get(i));
+                        interpreter.generatePCode(Fct.OPR, 0, 20);
+                    }
+                    nextSymbol();
+                } else {
+                    parseExpression(nxtlev, level);
+                    interpreter.generatePCode(Fct.OPR, 0, 20);
+                }
             } while (currentSymbol == Symbol.comma);
 
             if (currentSymbol == Symbol.rParen) {
