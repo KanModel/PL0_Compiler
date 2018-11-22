@@ -126,7 +126,7 @@ public class Scanner {
     /**
      * 读取一个字符，为减少磁盘I/O次数，每次读取一行
      */
-    void getChar() {
+    private void getChar() {
         String line = "";
         try {
             if (charCounter == currentLineLength) {
@@ -162,6 +162,9 @@ public class Scanner {
         } else if (justReadChar >= '0' && justReadChar <= '9') {
             // 数字
             matchNumber();
+        } else if (justReadChar == '\'') {
+            // 字符
+            matchChar();
         } else {
             // 操作符
             matchOperator();
@@ -171,7 +174,7 @@ public class Scanner {
     /**
      * 分析关键字或者一般标识符
      */
-    void matchKeywordOrIdentifier() {
+    private void matchKeywordOrIdentifier() {
         int i;
         StringBuilder sb = new StringBuilder(PL0.SYMBOL_MAX_LENGTH);
         // 首先把整个单词读出来
@@ -198,7 +201,7 @@ public class Scanner {
     /**
      * 分析数字
      */
-    void matchNumber() {
+    private void matchNumber() {
         int digit = 0;
         currentSymbol = Symbol.number;
         num = 0;
@@ -215,7 +218,7 @@ public class Scanner {
     /**
      * 分析操作符
      */
-    void matchOperator() {
+    private void matchOperator() {
         // 请注意这里的写法跟Wirth的有点不同
         switch (justReadChar) {
             case ':':        // 赋值符号
@@ -307,5 +310,19 @@ public class Scanner {
                     getChar();
                 break;
         }
+    }
+
+    /**
+     * 分析字符
+     */
+    private void matchChar() {
+        currentSymbol = Symbol.number;
+        getChar();
+        num = justReadChar;
+        getChar();
+        if (justReadChar != '\'') {
+            Err.report(41);
+        }
+        getChar();
     }
 }

@@ -38,11 +38,12 @@ public class ErrorReason {
         reason.put(21, "不能为过程");
         reason.put(22, "缺少右括号");
         reason.put(31, "超过数值范围");
+        reason.put(30, "超过数值范围");
         reason.put(32, "read()中的标识符不是变量");
         reason.put(33, "write()中应为完整表达式");
         reason.put(34, "格式错误，应是左括号");
         reason.put(35, "read()中应是声明过的变量名");
-        reason.put(41, "数组下标越界");
+        reason.put(41, "缺少单引号");
     }
 
     public static String get(int errCode) {
