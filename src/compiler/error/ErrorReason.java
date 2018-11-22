@@ -1,9 +1,10 @@
-package compiler.error;/**
+/**
  * Created with IntelliJ IDEA.
  * Description:
  * User: KanModel
  * Date: 2018-11-20-13:57
  */
+package compiler.error;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -56,6 +56,7 @@ public class Parser {
         statementBeginSet.set(Symbol.writeSym);
         statementBeginSet.set(Symbol.plusplus);
         statementBeginSet.set(Symbol.minusminus);
+        statementBeginSet.set(Symbol.printSym);
 
         // 设置因子First集
         factorBeginSet = new SymSet(SYMBOL_NUM);
@@ -333,6 +334,9 @@ public class Parser {
                 break;
             case sqrtSym:
                 parseSqrtStatement(fsys, level);
+                break;
+            case printSym:
+                parsePrintStatement(fsys, level);
                 break;
             default:
                 nxtlev = new SymSet(SYMBOL_NUM);
@@ -665,7 +669,7 @@ public class Parser {
      * @author: KanModel
      * @create: 2018/11/19 9:11
      */
-    boolean getArrayDiff(SymSet fsys, int level) {
+    private boolean getArrayDiff(SymSet fsys, int level) {
         if (currentSymbol == Symbol.lSquBra) {
             nextSymbol();
             parseExpression(fsys, level);
@@ -1020,5 +1024,34 @@ public class Parser {
         } else {
             Err.report(4);                    // var 后应是标识
         }
+    }
+
+    /**
+     * 分析<打印语句>
+     *
+     * @param fsys  后跟符号集
+     * @param level 当前层次
+     */
+    private void parsePrintStatement(SymSet fsys, int level) {
+        SymSet nxtlev;
+
+        nextSymbol();
+        if (currentSymbol == Symbol.lParen) {
+            do {
+                nextSymbol();
+                nxtlev = (SymSet) fsys.clone();//后跟符号集的拷贝 用于传入表达式分析
+                nxtlev.set(Symbol.rParen);//添加后跟符号 右括号
+                nxtlev.set(Symbol.comma);//添加后跟符号 逗号
+                parseExpression(nxtlev, level);
+                interpreter.generatePCode(Fct.OPR, 0, 20);
+            } while (currentSymbol == Symbol.comma);
+
+            if (currentSymbol == Symbol.rParen) {
+                nextSymbol();
+            } else {
+                Err.report(33);
+            }                // write()中应为完整表达式
+        }
+        interpreter.generatePCode(Fct.OPR, 0, 15);
     }
 }

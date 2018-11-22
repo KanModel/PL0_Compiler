@@ -183,6 +183,11 @@ public class Interpreter {
                         case 19:
                             s[t - 1] = (int) Math.sqrt(s[t - 1]);
                             break;
+                        case 20:
+                            System.out.print((char) s[t - 1]);
+                            PL0.resultPrintStream.print((char) s[t - 1]);
+                            t--;
+                            break;
                     }
                     break;
                 case LOD:                // 取相对当前过程的数据基地址为a的内存的值到栈顶

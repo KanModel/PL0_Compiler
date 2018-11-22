@@ -100,8 +100,8 @@ public class Scanner {
         charTable[']'] = Symbol.rSquBra;
 
         // …Ë÷√±£¡Ù◊÷√˚◊÷,∞¥’’◊÷ƒ∏À≥–Ú£¨±„”⁄’€∞Î≤È’“
-        keyword = new String[]{"array", "begin", "call", "const", "do", "else","end", "if",
-                "odd", "procedure", "read", "sqrt", "then", "var", "while", "write"};
+        keyword = new String[]{"array", "begin", "call", "const", "do", "else", "end", "if",
+                "odd", "print", "procedure", "read", "sqrt", "then", "var", "while", "write"};
 
         // …Ë÷√±£¡Ù◊÷∑˚∫≈
         keywordTable = new Symbol[PL0.KEYWORD_COUNT];
@@ -114,13 +114,14 @@ public class Scanner {
         keywordTable[6] = Symbol.endSym;
         keywordTable[7] = Symbol.ifSym;
         keywordTable[8] = Symbol.oddSym;
-        keywordTable[9] = Symbol.procSym;
-        keywordTable[10] = Symbol.readSym;
-        keywordTable[11] = Symbol.sqrtSym;
-        keywordTable[12] = Symbol.thenSym;
-        keywordTable[13] = Symbol.varSym;
-        keywordTable[14] = Symbol.whileSym;
-        keywordTable[15] = Symbol.writeSym;
+        keywordTable[9] = Symbol.printSym;
+        keywordTable[10] = Symbol.procSym;
+        keywordTable[11] = Symbol.readSym;
+        keywordTable[12] = Symbol.sqrtSym;
+        keywordTable[13] = Symbol.thenSym;
+        keywordTable[14] = Symbol.varSym;
+        keywordTable[15] = Symbol.whileSym;
+        keywordTable[16] = Symbol.writeSym;
     }
 
     /**
