@@ -673,11 +673,6 @@ public class Parser {
         if (currentSymbol == Symbol.lSquBra) {
             nextSymbol();
             parseExpression(fsys, level);
-//            if (currentSymbol == Symbol.number) {
-//                nextSymbol();
-//            } else {
-//                Err.report(40);
-//            }
 
             if (currentSymbol == Symbol.rSquBra) {
                 nextSymbol();
@@ -743,11 +738,6 @@ public class Parser {
             nxtlev.set(Symbol.sqrtSym);
 
             parseTerm(nxtlev, lev);
-//            if (currentSymbol == Symbol.sqrtSym) {
-//                parseSqrtStatement(fsys, lev);
-//            } else {
-//                parseTerm(nxtlev, lev);
-//            }
         }
 
 
@@ -933,7 +923,7 @@ public class Parser {
     }
 
     /**
-     * 分析<表达式>
+     * 分析<++-->
      *
      * @param fsys 后跟符号集
      * @param lev  当前层次
@@ -942,7 +932,7 @@ public class Parser {
         Symbol addop;
         SymSet nxtlev;
 
-        // 分析{[+|-|++|--]<项>}
+        // 分析{[++|--]<项>}
         if (currentSymbol == Symbol.plusplus || currentSymbol == Symbol.minusminus) {
             addop = currentSymbol;
             nextSymbol();
