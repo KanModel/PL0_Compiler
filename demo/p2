@@ -4,6 +4,6 @@ begin
 	if a < 0 then
 		write(a + 1);
 	else
-		write(a + 4);
+		write(a % 13);
 	write(a + 2);
 end.

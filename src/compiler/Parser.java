@@ -626,6 +626,15 @@ public class Parser {
             // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
             interpreter.generatePCode(Fct.OPR, 0, 5);
             storeVar(lev, item);
+        } else if(currentSymbol == Symbol.modAssSym) {
+            nextSymbol();
+
+            nxtlev = (SymSet) fsys.clone();
+            loadVar(lev, item);
+            parseExpression(nxtlev, lev);
+            // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
+            interpreter.generatePCode(Fct.OPR, 0, 21);
+            storeVar(lev, item);
         } else {
             Err.report(13);                // 没有检测到赋值符号
         }
@@ -741,6 +750,7 @@ public class Parser {
             nxtlev.set(Symbol.plus);
             nxtlev.set(Symbol.minus);
             nxtlev.set(Symbol.sqrtSym);
+            nxtlev.set(Symbol.mod);
 
             parseTerm(nxtlev, lev);
 //            if (currentSymbol == Symbol.sqrtSym) {
@@ -751,18 +761,20 @@ public class Parser {
         }
 
 
-        // 分析{<加法运算符><项>}
-        while (currentSymbol == Symbol.plus || currentSymbol == Symbol.minus) {
+        // 分析{<加法运算符><项> <取模><项>}
+        while (currentSymbol == Symbol.plus || currentSymbol == Symbol.minus || currentSymbol == Symbol.mod) {
             addop = currentSymbol;
             nextSymbol();
             nxtlev = (SymSet) fsys.clone();
             nxtlev.set(Symbol.plus);
             nxtlev.set(Symbol.minus);
+            nxtlev.set(Symbol.mod);
             parseTerm(nxtlev, lev);
             if (addop == Symbol.plus)
                 interpreter.generatePCode(Fct.OPR, 0, 2);
-            else
+            else if(addop == Symbol.minus)
                 interpreter.generatePCode(Fct.OPR, 0, 3);
+            else interpreter.generatePCode(Fct.OPR, 0, 21);
         }
     }
 
@@ -933,7 +945,7 @@ public class Parser {
     }
 
     /**
-     * 分析<表达式>
+     * 分析{[++|--]<项>}
      *
      * @param fsys 后跟符号集
      * @param lev  当前层次
@@ -942,7 +954,7 @@ public class Parser {
         Symbol addop;
         SymSet nxtlev;
 
-        // 分析{[+|-|++|--]<项>}
+        // 分析{[++|--]<项>}
         if (currentSymbol == Symbol.plusplus || currentSymbol == Symbol.minusminus) {
             addop = currentSymbol;
             nextSymbol();

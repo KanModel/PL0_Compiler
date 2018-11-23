@@ -104,6 +104,7 @@ public class Scanner {
         charTable[';'] = Symbol.semicolon;
         charTable['['] = Symbol.lSquBra;
         charTable[']'] = Symbol.rSquBra;
+        charTable['%'] = Symbol.mod;
 
         // 设置保留字名字,按照字母顺序，便于折半查找
         keyword = new String[]{"array", "begin", "call", "const", "do", "else", "end", "if",
@@ -314,6 +315,18 @@ public class Scanner {
                     currentSymbol = Symbol.slash;
                 }
                 break;
+
+            case '%':
+                getChar();
+                if (justReadChar == '=') {
+                    currentSymbol = Symbol.modAssSym;
+                    getChar();
+                } else {
+                    //单个%号
+                    currentSymbol = Symbol.mod;
+                }
+                break;
+
             default:        // 其他为单字符操作符（如果符号非法则返回nil）
                 currentSymbol = charTable[justReadChar];
                 if (currentSymbol != Symbol.period)
