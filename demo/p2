@@ -1,9 +1,10 @@
 var a;
 begin
-        a:=2;
-	while !a do
-        begin
-            a := a+1
-        end;
-        write(a);
+	a:=-5;
+	while !(!(a < 2)) do
+	begin
+		a := a+1;
+		write(a);
+	end;
+	write(a);
 end.

@@ -626,7 +626,7 @@ public class Parser {
             // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
             interpreter.generatePCode(Fct.OPR, 0, 5);
             storeVar(lev, item);
-        } else if(currentSymbol == Symbol.modAssSym) {
+        } else if (currentSymbol == Symbol.modAssSym) {
             nextSymbol();
 
             nxtlev = (SymSet) fsys.clone();
@@ -762,7 +762,7 @@ public class Parser {
             parseTerm(nxtlev, lev);
             if (addop == Symbol.plus)
                 interpreter.generatePCode(Fct.OPR, 0, 2);
-            else if(addop == Symbol.minus)
+            else if (addop == Symbol.minus)
                 interpreter.generatePCode(Fct.OPR, 0, 3);
             else interpreter.generatePCode(Fct.OPR, 0, 21);
         }
@@ -876,12 +876,24 @@ public class Parser {
         Symbol relop;
         SymSet nxtlev;
 
-        if (currentSymbol == Symbol.oddSym || currentSymbol == Symbol.not) {
+        if (currentSymbol == Symbol.oddSym) {
             // 分析 ODD<表达式>
             nextSymbol();
             parseExpression(fsys, lev);
-            if(currentSymbol == Symbol.oddSym) interpreter.generatePCode(Fct.OPR, 0, 6);
-            else interpreter.generatePCode(Fct.OPR, 0, 22);
+            interpreter.generatePCode(Fct.OPR, 0, 6);
+        } else if (currentSymbol == Symbol.not) {
+            nextSymbol();
+            if (currentSymbol == Symbol.lParen) {
+                nextSymbol();
+                parseCondition(fsys, lev);
+                if (currentSymbol == Symbol.rParen) {
+                    nextSymbol();
+                } else {
+                    Err.report(22);
+                }
+            }else
+                parseExpression(fsys, lev);
+            interpreter.generatePCode(Fct.OPR, 0, 22);
         } else {
             // 分析<表达式><关系运算符><表达式>
             nxtlev = (SymSet) fsys.clone();
