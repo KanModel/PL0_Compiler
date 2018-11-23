@@ -1,9 +1,9 @@
 var a;
 begin
-	a:=13;
-	if a < 0 then
-		write(a + 1);
-	else
-		write(a % 13);
-	write(a + 2);
+        a:=2;
+	while !a do
+        begin
+            a := a+1
+        end;
+        write(a);
 end.

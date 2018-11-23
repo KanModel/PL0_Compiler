@@ -27,5 +27,6 @@ public enum Symbol {
     minusminus, //自减符号--
     string,
     mod,//取模
-    modAssSym//%=
+    modAssSym,//%=
+    not//逻辑非
 }

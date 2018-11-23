@@ -105,6 +105,7 @@ public class Scanner {
         charTable['['] = Symbol.lSquBra;
         charTable[']'] = Symbol.rSquBra;
         charTable['%'] = Symbol.mod;
+        charTable['!'] = Symbol.not;
 
         // 设置保留字名字,按照字母顺序，便于折半查找
         keyword = new String[]{"array", "begin", "call", "const", "do", "else", "end", "if",

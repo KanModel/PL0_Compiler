@@ -886,11 +886,12 @@ public class Parser {
         Symbol relop;
         SymSet nxtlev;
 
-        if (currentSymbol == Symbol.oddSym) {
+        if (currentSymbol == Symbol.oddSym || currentSymbol == Symbol.not) {
             // 分析 ODD<表达式>
             nextSymbol();
             parseExpression(fsys, lev);
-            interpreter.generatePCode(Fct.OPR, 0, 6);
+            if(currentSymbol == Symbol.oddSym) interpreter.generatePCode(Fct.OPR, 0, 6);
+            else interpreter.generatePCode(Fct.OPR, 0, 22);
         } else {
             // 分析<表达式><关系运算符><表达式>
             nxtlev = (SymSet) fsys.clone();
