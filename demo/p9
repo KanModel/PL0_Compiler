@@ -12,6 +12,7 @@ begin
 	write(a[1][2]);
 	write(a[0][2]);
 	write(a[0][0]);
-	write(a[0][0]);
-	write(a);
+	write(a[0][0][0]);
+	write(a[0][0][0][0]);
+	write(a[0][0][0][0][0]);
 end.

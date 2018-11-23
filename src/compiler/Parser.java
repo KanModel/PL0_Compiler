@@ -681,9 +681,11 @@ public class Parser {
     private boolean getArrayDiff(SymSet fsys, int level) {
         if (currentSymbol == Symbol.lSquBra) {
             int dimCount = 0;
+            boolean flag = true;
             do {
                 nextSymbol();
-                if (dimCount > 0) interpreter.generatePCode(Fct.OPR, 0, 17);
+                if (dimCount > 0 && flag) interpreter.generatePCode(Fct.OPR, 0, 17);
+//                else flag = true;
                 parseExpression(fsys, level);
 
                 if (currentSymbol == Symbol.rSquBra) {
@@ -691,6 +693,7 @@ public class Parser {
                     if (dimCount > 0) {
                         interpreter.generatePCode(Fct.OPR, 0, 17);
                         interpreter.generatePCode(Fct.OPR, 0, 4);
+                        flag = false;
                     }
 
                 } else {
