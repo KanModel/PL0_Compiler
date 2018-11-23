@@ -188,6 +188,14 @@ public class Interpreter {
                             PL0.resultPrintStream.print((char) s[t - 1]);
                             t--;
                             break;
+                        case 21:
+                            t--;
+                            s[t - 1] = s[t - 1] % s[t];
+                            //为mod添加的新的虚拟机指令
+                            break;
+                        case 22:
+                            s[t - 1] = (s[t - 1] == 0 ? 1 : 0);
+                            break;
                     }
                     break;
                 case LOD:                // 取相对当前过程的数据基地址为a的内存的值到栈顶

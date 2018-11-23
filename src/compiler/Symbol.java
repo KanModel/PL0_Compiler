@@ -25,5 +25,8 @@ public enum Symbol {
     slashAssSym,
     plusplus, //自增符号++
     minusminus, //自减符号--
-    string
+    string,
+    mod,//取模
+    modAssSym,//%=
+    not//逻辑非
 }
