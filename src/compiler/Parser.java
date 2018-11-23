@@ -680,14 +680,25 @@ public class Parser {
      */
     private boolean getArrayDiff(SymSet fsys, int level) {
         if (currentSymbol == Symbol.lSquBra) {
-            nextSymbol();
-            parseExpression(fsys, level);
-
-            if (currentSymbol == Symbol.rSquBra) {
+            int dimCount = 0;
+            do {
                 nextSymbol();
-            } else {
-                Err.report(22);
-            }
+                if (dimCount > 0) interpreter.generatePCode(Fct.OPR, 0, 17);
+                parseExpression(fsys, level);
+
+                if (currentSymbol == Symbol.rSquBra) {
+                    nextSymbol();
+                    if (dimCount > 0) {
+                        interpreter.generatePCode(Fct.OPR, 0, 17);
+                        interpreter.generatePCode(Fct.OPR, 0, 4);
+                    }
+
+                } else {
+                    Err.report(22);
+                }
+                dimCount++;
+            } while (currentSymbol == Symbol.lSquBra);
+            if (dimCount > 1) interpreter.generatePCode(Fct.OPR, 0, 18);
             return true;
         } else {
             return false;
@@ -823,7 +834,7 @@ public class Parser {
                             interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr);
                             nextSymbol();
                             break;
-                        case array:            // 名字为变量
+                        case array:            // 名字为数组
                             nextSymbol();
                             if (getArrayDiff(fsys, lev)) {
                                 interpreter.generatePCode(Fct.LAD, lev - item.level, item.adr);
@@ -891,7 +902,7 @@ public class Parser {
                 } else {
                     Err.report(22);
                 }
-            }else
+            } else
                 parseExpression(fsys, lev);
             interpreter.generatePCode(Fct.OPR, 0, 22);
         } else {
@@ -1018,23 +1029,29 @@ public class Parser {
      * @param level 当前层次
      */
     private void parseArrayDeclaration(int level) {
+        int arraySize = 1;
+
         if (currentSymbol == Symbol.ident) {
             // 填写名字表并改变堆栈帧计数器
             nextSymbol();
-            if (currentSymbol == Symbol.lSquBra) {
-                nextSymbol();
-                if (currentSymbol == Symbol.number) {
+            do {
+                if (currentSymbol == Symbol.lSquBra) {
                     nextSymbol();
-                    for (int i = 0; i < scanner.num; i++) {
-                        identTable.enter(Objekt.array, level, dataSize);
-                        dataSize++;
+                    if (currentSymbol == Symbol.number) {
+                        arraySize *= scanner.num;
+                        nextSymbol();
                     }
                 }
-            }
-            if (currentSymbol == Symbol.rSquBra) {
-                nextSymbol();
-            } else {
-                Err.report(22);
+                if (currentSymbol == Symbol.rSquBra) {
+                    nextSymbol();
+                } else {
+                    Err.report(22);
+                }
+            } while (currentSymbol == Symbol.lSquBra);
+            //为数组开辟空间
+            for (int i = 0; i < arraySize; i++) {
+                identTable.enter(Objekt.array, level, dataSize);
+                dataSize++;
             }
         } else {
             Err.report(4);                    // var 后应是标识
