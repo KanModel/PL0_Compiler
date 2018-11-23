@@ -1,0 +1,17 @@
+var b;
+array a[2][3];
+begin
+	b := 5;
+	while b >= 0 do
+	begin
+		a[b] := b;
+		write(b);
+		--b;
+	end;
+	print("Array");
+	write(a[1][2]);
+	write(a[0][2]);
+	write(a[0][0]);
+	write(a[0][0]);
+	write(a);
+end.
