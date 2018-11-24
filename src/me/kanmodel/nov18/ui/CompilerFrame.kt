@@ -1,5 +1,6 @@
 package me.kanmodel.nov18.ui
 
+import compiler.ArrayStore
 import compiler.error.Err
 import compiler.error.ErrorReason
 import compiler.PL0
@@ -96,6 +97,7 @@ class CompilerFrame : JFrame() {
         }
         saveFile()//先保存后编译
         ErrorReason.init()
+        ArrayStore.arrayInfoList.clear()
 
         if (file == null) {
             JOptionPane.showMessageDialog(frame, "请先打开文件!", "警告", JOptionPane.WARNING_MESSAGE)

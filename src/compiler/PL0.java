@@ -20,7 +20,7 @@ public class PL0 {
 	public static final int LEVEL_MAX = 3;			// 最大允许过程嵌套声明层数 [0, LEVEL_MAX]
 	public static final int MAX_NUM_DIGIT = 14;			// number的最大位数
 	public static final int KEYWORD_COUNT = 32;			// 关键字个数
-	public static final int TABLE_MAX = 100;		// 名字表容量
+	public static final int TABLE_MAX = 200;		// 名字表容量
 	
 	// 一些全局变量，其他关键的变量分布如下：
 	// cx, code : compiler.Interpreter

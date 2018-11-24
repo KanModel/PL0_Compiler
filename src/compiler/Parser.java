@@ -2,6 +2,8 @@ package compiler;
 
 import compiler.error.Err;
 
+import java.util.ArrayList;
+
 /**
  * 　　语法分析器。这是PL/0分析器中最重要的部分，在语法分析的过程中穿插着语法错误检查和目标代码生成。
  */
@@ -559,7 +561,7 @@ public class Parser {
                 assign(fsys, lev, item);
             } else if (item.kind == Objekt.array) {
                 nextSymbol();
-                if (getArrayDiff(fsys, lev)) {
+                if (getArrayDiff(fsys, lev, item.name)) {
                     assign(fsys, lev, item);
                 } else {
                     Table.Item clone = identTable.copyItem(item);
@@ -678,30 +680,29 @@ public class Parser {
      * @author: KanModel
      * @create: 2018/11/19 9:11
      */
-    private boolean getArrayDiff(SymSet fsys, int level) {
+    private boolean getArrayDiff(SymSet fsys, int level, String name) {
+        ArrayStore.ArrayInfo info = ArrayStore.INSTANCE.get(name);
+        if (info == null) return false;
+        ArrayList<Integer> seq = info.component3();
         if (currentSymbol == Symbol.lSquBra) {
             int dimCount = 0;
-            boolean flag = true;
             do {
+                if (dimCount > 0) {
+                    for (int i = dimCount; i < info.getDim(); i++) {
+                        interpreter.generatePCode(Fct.LIT, 0, seq.get(i));
+                        interpreter.generatePCode(Fct.OPR, 0, 4);
+                    }
+                }
                 nextSymbol();
-                if (dimCount > 0 && flag) interpreter.generatePCode(Fct.OPR, 0, 17);
-//                else flag = true;
                 parseExpression(fsys, level);
-
+                if (dimCount > 0) interpreter.generatePCode(Fct.OPR, 0, 2);
                 if (currentSymbol == Symbol.rSquBra) {
                     nextSymbol();
-                    if (dimCount > 0) {
-                        interpreter.generatePCode(Fct.OPR, 0, 17);
-                        interpreter.generatePCode(Fct.OPR, 0, 4);
-                        flag = false;
-                    }
-
                 } else {
                     Err.report(22);
                 }
                 dimCount++;
             } while (currentSymbol == Symbol.lSquBra);
-            if (dimCount > 1) interpreter.generatePCode(Fct.OPR, 0, 18);
             return true;
         } else {
             return false;
@@ -839,7 +840,7 @@ public class Parser {
                             break;
                         case array:            // 名字为数组
                             nextSymbol();
-                            if (getArrayDiff(fsys, lev)) {
+                            if (getArrayDiff(fsys, lev, item.name)) {
                                 interpreter.generatePCode(Fct.LAD, lev - item.level, item.adr);
                             } else {
                                 interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr);
@@ -1041,6 +1042,7 @@ public class Parser {
                 if (currentSymbol == Symbol.lSquBra) {
                     nextSymbol();
                     if (currentSymbol == Symbol.number) {
+                        ArrayStore.INSTANCE.add(scanner.id, scanner.num);
                         arraySize *= scanner.num;
                         nextSymbol();
                     }
