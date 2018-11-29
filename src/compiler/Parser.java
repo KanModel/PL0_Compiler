@@ -766,7 +766,7 @@ public class Parser {
         }
 
 
-        // 分析{<加法运算符><项> <取模><项>}
+        // 分析{<加法运算符><项> | <取模><项>}
         while (currentSymbol == Symbol.plus || currentSymbol == Symbol.minus || currentSymbol == Symbol.mod) {
             addop = currentSymbol;
             nextSymbol();
@@ -863,7 +863,7 @@ public class Parser {
                 }
                 interpreter.generatePCode(Fct.LIT, 0, num);
                 nextSymbol();
-            } else if (currentSymbol == Symbol.sqrtSym) {
+            } else if (currentSymbol == Symbol.sqrtSym) {   //因子为sqrt运算
                 parseSqrtStatement(fsys, lev);
             } else if (currentSymbol == Symbol.lParen) {    // 因子为表达式
                 nextSymbol();

@@ -15,7 +15,7 @@ import java.io.*;
 public class PL0 {
 	// 编译程序的常数
 	public static final int SYMBOL_MAX_LENGTH = 10;			// 符号的最大长度
-	public static final int MAX_NUM = 2047;		// 最大允许的数值
+	public static final int MAX_NUM = 65565;		// 最大允许的数值
 	public static final int CX_MAX = 500;		// 最多的虚拟机代码数
 	public static final int LEVEL_MAX = 3;			// 最大允许过程嵌套声明层数 [0, LEVEL_MAX]
 	public static final int MAX_NUM_DIGIT = 14;			// number的最大位数
