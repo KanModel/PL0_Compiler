@@ -695,7 +695,6 @@ public class Parser {
                 }
                 nextSymbol();
                 parseExpression(fsys, level);
-                if (dimCount > 0) interpreter.generatePCode(Fct.OPR, 0, 2);
                 if (currentSymbol == Symbol.rSquBra) {
                     nextSymbol();
                 } else {
@@ -703,6 +702,9 @@ public class Parser {
                 }
                 dimCount++;
             } while (currentSymbol == Symbol.lSquBra);
+            while (dimCount-- > 1) {
+                interpreter.generatePCode(Fct.OPR, 0, 2);
+            }
             return true;
         } else {
             return false;
