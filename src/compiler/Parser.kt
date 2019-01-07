@@ -43,6 +43,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
         statementBeginSet.set(Symbol.callSym)
         statementBeginSet.set(Symbol.ifSym)
         statementBeginSet.set(Symbol.whileSym)
+        statementBeginSet.set(Symbol.forSym)
         statementBeginSet.set(Symbol.readSym)            // thanks to elu
         statementBeginSet.set(Symbol.plusplus)
         statementBeginSet.set(Symbol.minusminus)
@@ -93,7 +94,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
      * @param s2      如果不是我们需要的，则需要一个补救用的集合
      * @param errCode 错误号
      */
-    internal fun test(s1: SymSet, s2: SymSet, errCode: Int) {
+    private fun test(s1: SymSet, s2: SymSet, errCode: Int) {
         // 在某一部分（如一条语句，一个表达式）将要结束时时我们希望下一个符号属于某集合
         //（该部分的后跟符号），test负责这项检测，并且负责当检测不通过时的补救措施，程
         // 序在需要检测时指定当前需要的符号集合和补救用的集合（如之前未完成部分的后跟符
@@ -118,7 +119,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
         val dx0: Int
         val tx0: Int
         val cx0: Int                // 保留初始dx，tx和cx
-        var nextLevel = SymSet(SYMBOL_NUM)
+        var nextLevel: SymSet
 
         dx0 = dataSize                        // 记录本层之前的数据量（以便恢复）
         dataSize = 3
@@ -241,7 +242,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
         interpreter.generatePCode(Fct.OPR, 0, 0)        // 每个过程出口都要使用的释放数据段指令
 
         nextLevel = SymSet(SYMBOL_NUM)    // 分程序没有补救集合
-        test(fsys, nextLevel, 8)                // 检测后跟符号正确性
+        test(fsys, nextLevel, 8)// 检测后跟符号正确性
 
         interpreter.listCode(cx0)
 
@@ -299,8 +300,6 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
     </语句> */
     private fun parseStatement(fsys: SymSet, level: Int) {
         val nxtlev: SymSet
-        // Wirth 的 PL/0 编译器使用一系列的if...else...来处理
-        // 但是你的助教认为下面的写法能够更加清楚地看出这个函数的处理逻辑
         when (currentSymbol) {
             Symbol.ident -> parseAssignStatement(fsys, level)
             Symbol.readSym -> parseReadStatement(fsys, level)
@@ -308,6 +307,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
             Symbol.ifSym -> parseIfStatement(fsys, level)
             Symbol.beginSym -> parseBeginStatement(fsys, level)
             Symbol.whileSym -> parseWhileStatement(fsys, level)
+            Symbol.forSym -> parseForStatement(fsys, level)
             Symbol.plusplus -> parsePlusMinusAssign(fsys, level)
             Symbol.minusminus -> parsePlusMinusAssign(fsys, level)
             Symbol.sqrtSym -> parseSqrtStatement(fsys, level)
@@ -329,17 +329,15 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
      * @param lev  当前层次
     </当型循环语句> */
     private fun parseWhileStatement(fsys: SymSet, lev: Int) {
-        val cx1: Int
-        val cx2: Int
-        val nxtlev: SymSet
+        val cx1 = interpreter.cx
+        val nxtlev: SymSet = fsys.clone() as SymSet
 
-        cx1 = interpreter.cx                        // 保存判断条件操作的位置
+        // 保存判断条件操作的位置
         nextSymbol()
-        nxtlev = fsys.clone() as SymSet
-        nxtlev.set(Symbol.doSym)                // 后跟符号为do
-        parseCondition(nxtlev, lev)            // 分析<条件>
-        cx2 = interpreter.cx                        // 保存循环体的结束的下一个位置
-        interpreter.generatePCode(Fct.JPC, 0, 0)                // 生成条件跳转，但跳出循环的地址未知
+        nxtlev.set(Symbol.doSym)// 后跟符号为do
+        parseCondition(nxtlev, lev)// 分析<条件>
+        val cx2 = interpreter.cx// 保存循环体的结束的下一个位置
+        interpreter.generatePCode(Fct.JPC, 0, 0)// 生成条件跳转，但跳出循环的地址未知
         if (currentSymbol == Symbol.doSym)
             nextSymbol()
         else
@@ -347,6 +345,48 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
         parseStatement(fsys, lev)                // 分析<语句>
         interpreter.generatePCode(Fct.JMP, 0, cx1)            // 回头重新判断条件
         interpreter.code[cx2]!!.a = interpreter.cx            // 反填跳出循环的地址，与<条件语句>类似
+    }
+
+    private fun parseForStatement(fsys: SymSet, lev: Int) {
+        nextSymbol()
+        val i = parseAssignStatement(fsys, lev)
+
+        val changeSymbols = arrayOf(Symbol.toSym, Symbol.untilSym, Symbol.downtoSym)
+        if (currentSymbol in changeSymbols) {
+            val changeSymbol = currentSymbol
+
+            val cx1 = interpreter.cx//记录循环开始
+
+            nextSymbol()
+            parseExpression(fsys, lev)
+            loadVar(lev, table[i]!!)
+            when (changeSymbol) {
+                Symbol.toSym -> interpreter.generatePCode(Fct.OPR, 0, 11)//比较次栈顶是否大于等于栈顶 1
+                Symbol.untilSym -> interpreter.generatePCode(Fct.OPR, 0, 12)//比较次栈顶是否大于栈顶 1
+                Symbol.downtoSym -> interpreter.generatePCode(Fct.OPR, 0, 13)//比较次栈顶是否小于等于栈顶 1
+                else -> Err.report(42)
+            }
+
+            val cx2 = interpreter.cx// 保存循环体的结束的下一个位置
+            interpreter.generatePCode(Fct.JPC, 0, 0)// 生成条件跳转，但跳出循环的地址未知
+            if (currentSymbol == Symbol.doSym)
+                nextSymbol()
+            else
+                Err.report(18)// 缺少do
+            parseStatement(fsys, lev)// 分析<语句>
+
+            loadVar(lev, table[i]!!)
+            if (changeSymbol != Symbol.downtoSym) {
+                interpreter.generatePCode(Fct.OPR, 0, 17)//+1
+            } else {
+                interpreter.generatePCode(Fct.OPR, 0, 18)//+1
+            }
+            storeVar(lev, table[i]!!)//循环标记变量递加/递减
+
+            interpreter.generatePCode(Fct.JMP, 0, cx1)// 回头重新判断条件
+            interpreter.code[cx2]!!.a = interpreter.cx// 反填跳出循环的地址，与<条件语句>类似
+        } else
+            Err.report(42)
     }
 
     /**
@@ -533,30 +573,33 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
      * @param fsys 后跟符号集
      * @param lev  当前层次
     </赋值语句> */
-    private fun parseAssignStatement(fsys: SymSet, lev: Int) {
+    private fun parseAssignStatement(fsys: SymSet, lev: Int): Int {
         val i = table.position(scanner.id)
         if (i > 0) {
             val item = table[i]
             if (item != null) {
-                if (item.kind == Object.variable) {
-                    nextSymbol()
-                    assign(fsys, lev, item)
-                } else if (item.kind == Object.array) {
-                    nextSymbol()
-                    if (getArrayDiff(fsys, lev, item.name!!)) {
+                when {
+                    item.kind == Object.variable -> {
+                        nextSymbol()
                         assign(fsys, lev, item)
-                    } else {
-                        val clone = table.copyItem(item)
-                        clone.kind = Object.variable
-                        assign(fsys, lev, clone)
                     }
-                } else {
-                    Err.report(12)                        // 赋值语句格式错误
+                    item.kind == Object.array -> {
+                        nextSymbol()
+                        if (getArrayDiff(fsys, lev, item.name!!)) {
+                            assign(fsys, lev, item)
+                        } else {
+                            val clone = table.copyItem(item)
+                            clone.kind = Object.variable
+                            assign(fsys, lev, clone)
+                        }
+                    }
+                    else -> Err.report(12)                        // 赋值语句格式错误
                 }
             }
         } else {
             Err.report(11)                            // 变量未找到
         }
+        return i
     }
 
     /**
@@ -1066,6 +1109,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
         if (currentSymbol == Symbol.lParen) {
             do {
                 nextSymbol()
+                if (currentSymbol == Symbol.rParen) break
                 nxtlev = fsys.clone() as SymSet//后跟符号集的拷贝 用于传入表达式分析
                 nxtlev.set(Symbol.rParen)//添加后跟符号 右括号
                 nxtlev.set(Symbol.comma)//添加后跟符号 逗号

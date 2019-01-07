@@ -53,6 +53,11 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
         keywords.add("var")
         keywords.add("const")
         keywords.add("procedure")
+        keywords.add("for")
+        keywords.add("to")
+        keywords.add("until")
+        keywords.add("downto")
+        keywords.add("step")
         // 准备操作相关函数
         operators = HashSet()
         operators.add("sqrt")

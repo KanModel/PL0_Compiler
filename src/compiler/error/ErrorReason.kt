@@ -25,6 +25,9 @@ object ErrorReason {
         reason[3] = "常量说明标识后应是 ="
         reason[4] = "procedure后应为标识符 const 后应是标识符 var 后应是标识"
         reason[5] = "漏掉了逗号或者分号"
+        reason[6] = "当前符号不属于语句开始符号集"
+        reason[7] = "当前符号不属于语句开始符号集"
+        reason[8] = "当前符号不属于当前语句后跟符号集"
         reason[9] = "缺少句号"
         reason[10] = "缺少分号"
         reason[11] = "标识符未定义"
@@ -35,6 +38,7 @@ object ErrorReason {
         reason[16] = "缺少then"
         reason[17] = "缺少end或分号"
         reason[18] = "缺少do"
+        reason[19] = "当前符号不属于语句开始符号集"
         reason[21] = "不能为过程"
         reason[22] = "缺少右括号"
         reason[31] = "超过数值范围"
@@ -44,6 +48,7 @@ object ErrorReason {
         reason[34] = "格式错误，应是左括号"
         reason[35] = "read()中应是声明过的变量名"
         reason[41] = "缺少单引号"
+        reason[41] = "for语句不完整"
     }
 
     operator fun get(errCode: Int): String? {

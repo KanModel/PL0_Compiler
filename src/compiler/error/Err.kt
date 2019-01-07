@@ -36,7 +36,7 @@ object Err {
     fun showResult() {
         println()
         for (i in errors.indices) {
-            println("Error in line " + errors[i].lineCount + ": " + errors[i].errorInfo)
+            println("Error in line ${errors[i].lineCount}: ${errors[i].errorInfo} - ${errors[i].errCode}")
         }
     }
 }

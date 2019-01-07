@@ -10,8 +10,13 @@ enum class Symbol {
     semicolon, //·ÖºÅ;
     period, //¾äºÅ.
     becomes, //¸³Öµ:=
-    beginSym, endSym, ifSym, thenSym, whileSym,
-    readSym, doSym, callSym, constSym, varSym, procSym,
+    beginSym, endSym, ifSym, thenSym, whileSym, doSym,
+    readSym, callSym, constSym, varSym, procSym,
+    forSym,
+    toSym,
+    untilSym,
+    downtoSym,
+    stepSym,
     writeSym,
     writelnSym,
     printSym,

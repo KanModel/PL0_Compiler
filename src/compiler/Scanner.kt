@@ -4,7 +4,7 @@ import compiler.error.Err
 
 import java.io.BufferedReader
 import java.io.IOException
-import java.util.ArrayList
+import java.util.*
 
 /**
  * 　　词法分析器负责的工作是从源代码里面读取文法符号，这是PL/0编译器的主要组成部分之一。
@@ -100,9 +100,10 @@ class Scanner(val inReader: BufferedReader) {
         charTable['%'.toInt()] = Symbol.mod
         charTable['!'.toInt()] = Symbol.not
 
-        // 设置保留字名字,按照字母顺序，便于折半查找
         keyword = arrayOf("array", "begin", "call", "const", "do", "else", "end", "if", "odd", "print", "println",
-                "procedure", "read", "sqrt", "then", "var", "while", "write", "writeln")
+                "procedure", "read", "sqrt", "then", "var", "while", "write", "writeln", "for", "to", "until", "step",
+                "downto")
+        Arrays.sort(keyword)// 设置保留字名字,按照字母顺序，便于折半查找
 
         // 设置保留字符号
         keywordTable[0] = Symbol.arraySym
@@ -110,20 +111,25 @@ class Scanner(val inReader: BufferedReader) {
         keywordTable[2] = Symbol.callSym
         keywordTable[3] = Symbol.constSym
         keywordTable[4] = Symbol.doSym
-        keywordTable[5] = Symbol.elseSym
-        keywordTable[6] = Symbol.endSym
-        keywordTable[7] = Symbol.ifSym
-        keywordTable[8] = Symbol.oddSym
-        keywordTable[9] = Symbol.printSym
-        keywordTable[10] = Symbol.printlnSym
-        keywordTable[11] = Symbol.procSym
-        keywordTable[12] = Symbol.readSym
-        keywordTable[13] = Symbol.sqrtSym
-        keywordTable[14] = Symbol.thenSym
-        keywordTable[15] = Symbol.varSym
-        keywordTable[16] = Symbol.whileSym
-        keywordTable[17] = Symbol.writeSym
-        keywordTable[18] = Symbol.writelnSym
+        keywordTable[5] = Symbol.downtoSym
+        keywordTable[6] = Symbol.elseSym
+        keywordTable[7] = Symbol.endSym
+        keywordTable[8] = Symbol.forSym
+        keywordTable[9] = Symbol.ifSym
+        keywordTable[10] = Symbol.oddSym
+        keywordTable[11] = Symbol.printSym
+        keywordTable[12] = Symbol.printlnSym
+        keywordTable[13] = Symbol.procSym
+        keywordTable[14] = Symbol.readSym
+        keywordTable[15] = Symbol.sqrtSym
+        keywordTable[16] = Symbol.stepSym
+        keywordTable[17] = Symbol.thenSym
+        keywordTable[18] = Symbol.toSym
+        keywordTable[19] = Symbol.untilSym
+        keywordTable[20] = Symbol.varSym
+        keywordTable[21] = Symbol.whileSym
+        keywordTable[22] = Symbol.writeSym
+        keywordTable[23] = Symbol.writelnSym
     }
 
     /**

@@ -59,7 +59,9 @@ class CompilerFrame : JFrame() {
             if (file == null) {
                 createNewFile()
             }
-            saveFile()
+            if (file != null) {
+                saveFile()
+            }
         }
         compileItem.addActionListener {
             Thread {
@@ -191,14 +193,16 @@ class CompilerFrame : JFrame() {
     private fun createNewFile() {
         if (file == null) {
             save.isVisible = true
-            val dirPath = save.directory
-            val fileName = save.file
-            fileString = dirPath + fileName
-            frame.title = "$fileString$titleName"
-            if (dirPath == null || fileName == null) {
-                return
+            if (save.directory != null) {
+                val dirPath = save.directory
+                val fileName = save.file
+                fileString = dirPath + fileName
+                frame.title = "$fileString$titleName"
+                if (dirPath == null || fileName == null) {
+                    return
+                }
+                file = File(dirPath, fileName)
             }
-            file = File(dirPath, fileName)
         }
     }
 
