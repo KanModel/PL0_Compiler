@@ -11,8 +11,6 @@ import java.io.*
  * 的，有些地方可能有所改动，例如getsym()和statement()两个函数，另外请注意C语言
  * 版本中的全局变量分散到构成编译器各个类中，为便于查找，保留了这些全局变量原来的名字。
  *
- *
- * 阅读过程中若有疑问请及时咨询你的助教。
  */
 class PL0
 /**
@@ -22,7 +20,6 @@ class PL0
 (fin: BufferedReader) {
 
     init {
-        // 各部件的构造函数中都含有C语言版本的 init() 函数的一部分代码
         table = Table()
         interpreter = Interpreter()
         scanner = Scanner(fin)

@@ -1,7 +1,6 @@
 package me.kanmodel.nov18.ui
 
 import compiler.ArrayStore
-import compiler.Interpreter
 import compiler.error.Err
 import compiler.error.ErrorReason
 import compiler.PL0
@@ -31,6 +30,7 @@ class CompilerFrame : JFrame() {
         val fileMenu = JMenu("文件")
         val projectMenu = JMenu("项目")
         val helpMenu = JMenu("帮助")
+        val newItem = JMenuItem("新建")
         val openItem = JMenuItem("打开")
         val closeItem = JMenuItem("关闭")
         val saveItem = JMenuItem("保存")
@@ -41,6 +41,7 @@ class CompilerFrame : JFrame() {
         menuBar.add(fileMenu)
         menuBar.add(projectMenu)
         menuBar.add(helpMenu)
+        fileMenu.add(newItem)
         fileMenu.add(openItem)
         fileMenu.add(saveItem)
         fileMenu.add(closeItem)
@@ -48,12 +49,15 @@ class CompilerFrame : JFrame() {
         projectMenu.add(runItem)
         projectMenu.add(compileAndRunItem)
         helpMenu.add(aboutItem)
+        newItem.addActionListener {
+            newFile()
+        }
         openItem.addActionListener {
             openFile()
         }
         saveItem.addActionListener {
             if (file == null) {
-                newFile()
+                createNewFile()
             }
             saveFile()
         }
@@ -99,7 +103,7 @@ class CompilerFrame : JFrame() {
 
     private fun compileFile(file: String?) {
         if (Companion.file == null) {
-            newFile()
+            createNewFile()
         }
         saveFile()//先保存后编译
         ErrorReason.init()
@@ -146,6 +150,12 @@ class CompilerFrame : JFrame() {
         }
     }
 
+    private fun newFile(){
+        title = "new$titleName"
+        editor.text = ""//打开文件之前清空文本区域
+        file = null
+    }
+
     private fun openFile() {
         open.isVisible = true
 
@@ -178,7 +188,7 @@ class CompilerFrame : JFrame() {
     }
 
     //新建一个文件
-    private fun newFile() {
+    private fun createNewFile() {
         if (file == null) {
             save.isVisible = true
             val dirPath = save.directory

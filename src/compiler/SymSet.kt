@@ -8,9 +8,9 @@ import java.util.BitSet
 class SymSet
 /**
  * 构造一个符号集合
- * @param nbits 这个集合的容量
+ * @param nBits 这个集合的容量
  */
-(nbits: Int) : BitSet(nbits) {
+(nBits: Int) : BitSet(nBits) {
 
     /**
      * 把一个符号放到集合中
@@ -34,6 +34,6 @@ class SymSet
         /**
          * 这个域没有特别意义
          */
-        private val serialVersionUID = 8136959240158320958L
+        private const val serialVersionUID = 8136959240158320958L
     }
 }

@@ -142,7 +142,7 @@ class Scanner(val inReader: BufferedReader) {
                 PL0.sourcePrintStream.println("${PL0.interpreter.cx} $line")
             }
         } catch (e: IOException) {
-            throw Error("program imcomplete")
+            throw Error("program incomplete")
         }
 
         justReadChar = currentLine!![charCounter]
@@ -153,16 +153,13 @@ class Scanner(val inReader: BufferedReader) {
      * 词法分析，获取一个词法符号，是词法分析器的重点
      */
     fun getSymbol() {
-        // Wirth 的 PL/0 编译器使用一系列的if...else...来处理
-        // 但是你的助教认为下面的写法能够更加清楚地看出这个函数的处理逻辑
         while (Character.isWhitespace(justReadChar))
-        // 跳过所有空白字符
-            getChar()
+            getChar()// 跳过所有空白字符
 
-        if (justReadChar >= 'a' && justReadChar <= 'z' || justReadChar == '_') {
+        if (justReadChar in 'a'..'z' || justReadChar == '_') {
             // 关键字或者一般标识符
             matchKeywordOrIdentifier()
-        } else if (justReadChar >= '0' && justReadChar <= '9') {
+        } else if (justReadChar in '0'..'9') {
             // 数字
             matchNumber()
         } else if (justReadChar == '\'') {
@@ -187,7 +184,7 @@ class Scanner(val inReader: BufferedReader) {
         do {
             sb.append(justReadChar)
             getChar()
-        } while (justReadChar >= 'a' && justReadChar <= 'z' || justReadChar >= '0' && justReadChar <= '9' || justReadChar == '_')
+        } while (justReadChar in 'a'..'z' || justReadChar in '0'..'9' || justReadChar == '_')
         id = sb.toString()
 
         // 然后搜索是不是保留字（请注意使用的是什么搜索方法）
@@ -214,7 +211,7 @@ class Scanner(val inReader: BufferedReader) {
             num = 10 * num + Character.digit(justReadChar, 10)
             digit++
             getChar()
-        } while (justReadChar >= '0' && justReadChar <= '9')                // 获取数字的值
+        } while (justReadChar in '0'..'9')                // 获取数字的值
         digit--
         if (digit > PL0.MAX_NUM_DIGIT)
             Err.report(30)
@@ -224,7 +221,6 @@ class Scanner(val inReader: BufferedReader) {
      * 分析操作符
      */
     private fun matchOperator() {
-        // 请注意这里的写法跟Wirth的有点不同
         when (justReadChar) {
             ':'        // 赋值符号
             -> {

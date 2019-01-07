@@ -25,7 +25,7 @@ class Table {
      */
     class Item {
         internal var name: String? = null        // 名字
-        internal var kind: Objekt? = null        // 类型：const, var or procedure
+        internal var kind: Object? = null        // 类型：const, var or procedure
         internal var `val`: Int = 0            // 数值，仅const使用
         internal var level: Int = 0            // 所处层，var和procedure使用
         internal var adr: Int = 0            // 地址，var和procedure使用
@@ -64,31 +64,31 @@ class Table {
      * @param level      名字所在的层次
      * @param dx         当前应分配的变量的相对地址，注意调用enter()后dx要加一
      */
-    fun enter(symbolType: Objekt, level: Int, dx: Int) {
+    fun enter(symbolType: Object, level: Int, dx: Int) {
         tableSize++
         val item = get(tableSize)
         if (item != null) {
             item.name = PL0.scanner.id
             item.kind = symbolType
             when (symbolType) {
-                Objekt.constant                    // 常量名字
+                Object.constant                    // 常量名字
                 -> if (PL0.scanner.num > PL0.MAX_NUM) {
                     Err.report(31)        // 数字过大溢出
                     item.`val` = 0
                 } else {
                     item.`val` = PL0.scanner.num
                 }
-                Objekt.variable                    // 变量名字
+                Object.variable                    // 变量名字
                 -> {
                     item.level = level
                     item.adr = dx
                 }
-                Objekt.array                    // 变量名字
+                Object.array                    // 变量名字
                 -> {
                     item.level = level
                     item.adr = dx
                 }
-                Objekt.procedure                    // 过程名字
+                Object.procedure                    // 过程名字
                 -> item.level = level
             }
         }            // 注意id和num都是从词法分析器获得
@@ -108,10 +108,10 @@ class Table {
         for (i in start + 1..tableSize) {
             var msg = "OOPS! UNKNOWN TABLE ITEM!"
             when (table[i]!!.kind) {
-                Objekt.constant -> msg = "    " + i + " const " + table[i]!!.name + " val=" + table[i]!!.`val`
-                Objekt.variable -> msg = "    " + i + " var   " + table[i]!!.name + " lev=" + table[i]!!.level + " addr=" + table[i]!!.adr
-                Objekt.procedure -> msg = "    " + i + " proc  " + table[i]!!.name + " lev=" + table[i]!!.level + " addr=" + table[i]!!.adr + " size=" + table[i]!!.size
-                Objekt.array -> msg = "    " + i + " array  " + table[i]!!.name + " lev=" + table[i]!!.level + " addr=" + table[i]!!.adr
+                Object.constant -> msg = "    " + i + " const " + table[i]!!.name + " val=" + table[i]!!.`val`
+                Object.variable -> msg = "    " + i + " var   " + table[i]!!.name + " lev=" + table[i]!!.level + " addr=" + table[i]!!.adr
+                Object.procedure -> msg = "    " + i + " proc  " + table[i]!!.name + " lev=" + table[i]!!.level + " addr=" + table[i]!!.adr + " size=" + table[i]!!.size
+                Object.array -> msg = "    " + i + " array  " + table[i]!!.name + " lev=" + table[i]!!.level + " addr=" + table[i]!!.adr
             }
             println(msg)
             PL0.tablePrintStream.println(msg)

@@ -184,7 +184,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
             while (currentSymbol == Symbol.procSym) {
                 nextSymbol()
                 if (currentSymbol == Symbol.ident) {
-                    table.enter(Objekt.procedure, level, dataSize)
+                    table.enter(Object.procedure, level, dataSize)
                     nextSymbol()
                 } else {
                     Err.report(4)                // procedure后应为标识符
@@ -258,7 +258,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
                     Err.report(1)            // 把 = 写成了 :=
                 nextSymbol()
                 if (currentSymbol == Symbol.number) {
-                    table.enter(Objekt.constant, level, dataSize)
+                    table.enter(Object.constant, level, dataSize)
                     nextSymbol()
                 } else {
                     Err.report(2)            // 常量说明 = 后应是数字
@@ -279,7 +279,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
     private fun parseVarDeclaration(level: Int) {
         if (currentSymbol == Symbol.ident) {
             // 填写名字表并改变堆栈帧计数器
-            table.enter(Objekt.variable, level, dataSize)
+            table.enter(Object.variable, level, dataSize)
             dataSize++
             nextSymbol()
         } else {
@@ -431,7 +431,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
             } else {
                 val item = table.get(i)
                 if (item != null) {
-                    if (item.kind == Objekt.procedure)
+                    if (item.kind == Object.procedure)
                         interpreter.generatePCode(Fct.CAL, lev - item.level, item.adr)
                     else
                         Err.report(15)
@@ -494,7 +494,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
                     Err.report(35)            // read()中应是声明过的变量名
                 } else {
                     val item = table.get(i)
-                    if (item!!.kind != Objekt.variable) {
+                    if (item!!.kind != Object.variable) {
                         Err.report(32)        // read()中的标识符不是变量, thanks to amd
                     } else {
                         interpreter.generatePCode(Fct.OPR, 0, 16)
@@ -529,16 +529,16 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
         if (i > 0) {
             val item = table.get(i)
             if (item != null) {
-                if (item.kind == Objekt.variable) {
+                if (item.kind == Object.variable) {
                     nextSymbol()
                     assign(fsys, lev, item)
-                } else if (item.kind == Objekt.array) {
+                } else if (item.kind == Object.array) {
                     nextSymbol()
                     if (getArrayDiff(fsys, lev, item.name!!)) {
                         assign(fsys, lev, item)
                     } else {
                         val clone = table.copyItem(item)
-                        clone.kind = Objekt.variable
+                        clone.kind = Object.variable
                         assign(fsys, lev, clone)
                     }
                 } else {
@@ -624,7 +624,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
      * @create: 2018/11/20 13:35
      */
     private fun loadVar(lev: Int, item: Table.Item) {
-        if (item.kind == Objekt.variable) {
+        if (item.kind == Object.variable) {
             interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr)
         } else {
             interpreter.code[interpreter.cx] = interpreter.code[interpreter.cx - 1]
@@ -641,7 +641,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
      * @create: 2018/11/20 13:34
      */
     private fun storeVar(lev: Int, item: Table.Item) {
-        if (item.kind == Objekt.variable) {
+        if (item.kind == Object.variable) {
             interpreter.generatePCode(Fct.STO, lev - item.level, item.adr)
         } else {
             interpreter.generatePCode(Fct.STA, lev - item.level, item.adr)
@@ -716,7 +716,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
                 if (i > 0) {
                     val item = table.get(i)
                     if (item != null) {
-                        if (item.kind == Objekt.variable) {
+                        if (item.kind == Object.variable) {
                             interpreter.generatePCode(Fct.STO, lev - item.level, item.adr)//保存栈顶到变量值
                             interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr)//取出变量值到栈顶
                         } else {
@@ -808,17 +808,17 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
                     val item = table.get(i)
                     if (item != null) {
                         when (item.kind) {
-                            Objekt.constant            // 名字为常量
+                            Object.constant            // 名字为常量
                             -> {
                                 interpreter.generatePCode(Fct.LIT, 0, item.`val`)
                                 nextSymbol()
                             }
-                            Objekt.variable            // 名字为变量
+                            Object.variable            // 名字为变量
                             -> {
                                 interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr)
                                 nextSymbol()
                             }
-                            Objekt.array            // 名字为数组
+                            Object.array            // 名字为数组
                             -> {
                                 nextSymbol()
                                 if (getArrayDiff(fsys, lev, item.name!!)) {
@@ -827,7 +827,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
                                     interpreter.generatePCode(Fct.LOD, lev - item.level, item.adr)
                                 }
                             }
-                            Objekt.procedure            // 名字为过程
+                            Object.procedure            // 名字为过程
                             -> {
                                 Err.report(21)                // 不能为过程
                                 nextSymbol()
@@ -963,7 +963,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
             if (i > 0) {
                 val item = table.get(i)
                 if (item != null) {
-                    if (item.kind == Objekt.variable) {
+                    if (item.kind == Object.variable) {
                         interpreter.generatePCode(Fct.STO, lev - item.level, item.adr)//保存栈顶到变量值
                     } else {
                         Err.report(12)                        // 赋值语句格式错误
@@ -1028,7 +1028,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
             } while (currentSymbol == Symbol.lSquBra)
             //为数组开辟空间
             for (i in 0 until arraySize) {
-                table.enter(Objekt.array, level, dataSize)
+                table.enter(Object.array, level, dataSize)
                 dataSize++
             }
         } else {
