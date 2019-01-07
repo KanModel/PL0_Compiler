@@ -1,6 +1,7 @@
 package me.kanmodel.nov18.ui
 
 import compiler.ArrayStore
+import compiler.Interpreter
 import compiler.error.Err
 import compiler.error.ErrorReason
 import compiler.PL0
@@ -57,23 +58,28 @@ class CompilerFrame : JFrame() {
             saveFile()
         }
         compileItem.addActionListener {
-            Thread{
+            Thread {
                 compileFile(fileString)
             }.start()
         }
         runItem.addActionListener {
-            Thread{
+            Thread {
                 run()
             }.start()
         }
         compileAndRunItem.addActionListener {
-            Thread{
+            Thread {
                 compileFile(fileString)
                 run()
             }.start()
         }
         closeItem.addActionListener { System.exit(0) }
-        aboutItem.addActionListener { JOptionPane.showMessageDialog(null, "PL0 编译器客户端") }
+        aboutItem.addActionListener {
+            JOptionPane.showMessageDialog(null, "\n" +
+                    "             PL0 编译器客户端\n" +
+                    "                         ——by KanModel\n" +
+                    "https://github.com/KanModel/PL0_Compiler")
+        }
 
         add(menuBar, BorderLayout.NORTH)
         add(jScrollPane, BorderLayout.CENTER)
@@ -103,7 +109,6 @@ class CompilerFrame : JFrame() {
             JOptionPane.showMessageDialog(frame, "请先打开文件!", "警告", JOptionPane.WARNING_MESSAGE)
             return
         }
-        PL0.stdin = BufferedReader(InputStreamReader(System.`in`))
         val fin: BufferedReader
         try {
             fin = BufferedReader(FileReader(file), 4096)
@@ -114,7 +119,6 @@ class CompilerFrame : JFrame() {
             // 是否输出名字表
             PL0.tableSwitch = true
 
-            PL0.sourcePrintStream = PrintStream("source.tmp")
             PL0.sourcePrintStream.println("Input pl/0 file?   $file")
 
             // 构造编译器并初始化
@@ -135,7 +139,6 @@ class CompilerFrame : JFrame() {
 
     private fun run() {
         if (isCompileSuccess) {
-            PL0.resultPrintStream = PrintStream("result.tmp")
             PL0.interpreter.interpret()
             PL0.resultPrintStream.close()
         } else {
