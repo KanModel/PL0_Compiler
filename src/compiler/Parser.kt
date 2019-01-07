@@ -369,6 +369,20 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
 
             val cx2 = interpreter.cx// 保存循环体的结束的下一个位置
             interpreter.generatePCode(Fct.JPC, 0, 0)// 生成条件跳转，但跳出循环的地址未知
+
+            var isStep = false
+            var step: Int = 0
+            if(currentSymbol == Symbol.stepSym){
+                isStep = true
+                nextSymbol()
+                if (currentSymbol == Symbol.number) {
+                    step = scanner.num
+                    nextSymbol()
+                } else {
+                    Err.report(43)
+                }
+            }
+
             if (currentSymbol == Symbol.doSym)
                 nextSymbol()
             else
@@ -377,9 +391,19 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
 
             loadVar(lev, table[i]!!)
             if (changeSymbol != Symbol.downtoSym) {
-                interpreter.generatePCode(Fct.OPR, 0, 17)//+1
+                if (!isStep) {
+                    interpreter.generatePCode(Fct.OPR, 0, 17)//+1
+                } else {
+                    interpreter.generatePCode(Fct.LIT, 0, step)
+                    interpreter.generatePCode(Fct.OPR, 0, 2)//相加
+                }
             } else {
-                interpreter.generatePCode(Fct.OPR, 0, 18)//+1
+                if (!isStep) {
+                    interpreter.generatePCode(Fct.OPR, 0, 18)//+1
+                } else {
+                    interpreter.generatePCode(Fct.LIT, 0, step)
+                    interpreter.generatePCode(Fct.OPR, 0, 3)//相减
+                }
             }
             storeVar(lev, table[i]!!)//循环标记变量递加/递减
 

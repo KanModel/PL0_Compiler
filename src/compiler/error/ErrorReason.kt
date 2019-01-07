@@ -48,7 +48,8 @@ object ErrorReason {
         reason[34] = "格式错误，应是左括号"
         reason[35] = "read()中应是声明过的变量名"
         reason[41] = "缺少单引号"
-        reason[41] = "for语句不完整"
+        reason[42] = "for语句不完整"
+        reason[43] = "step缺少参数"
     }
 
     operator fun get(errCode: Int): String? {
