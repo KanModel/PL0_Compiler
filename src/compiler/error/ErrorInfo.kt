@@ -13,9 +13,5 @@ package compiler.error
  * @create: 2018-11-20 14:27
  */
 class ErrorInfo(internal var errCode: Int, internal var lineCount: Int, internal var posCount: Int) {
-    internal var errorInfo: String
-
-    init {
-        this.errorInfo = ErrorReason.get(errCode)!!
-    }
+    internal var errorInfo: String = ErrorReason[errCode]!!
 }

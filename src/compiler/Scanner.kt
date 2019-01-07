@@ -55,7 +55,7 @@ class Scanner(val inReader: BufferedReader) {
     /**
      * 单字符的符号值
      */
-    private val charTable: Array<Symbol?>
+    private val charTable: Array<Symbol?> = arrayOfNulls(256)
 
     /**
      * 标识符名字（如果当前符号是标识符的话）
@@ -83,7 +83,6 @@ class Scanner(val inReader: BufferedReader) {
     init {
 
         // 设置单字符符号
-        charTable = arrayOfNulls(256)
         java.util.Arrays.fill(charTable, Symbol.nul)
         charTable['+'.toInt()] = Symbol.plus
         charTable['-'.toInt()] = Symbol.minus
@@ -102,7 +101,8 @@ class Scanner(val inReader: BufferedReader) {
         charTable['!'.toInt()] = Symbol.not
 
         // 设置保留字名字,按照字母顺序，便于折半查找
-        keyword = arrayOf("array", "begin", "call", "const", "do", "else", "end", "if", "odd", "print", "procedure", "read", "sqrt", "then", "var", "while", "write")
+        keyword = arrayOf("array", "begin", "call", "const", "do", "else", "end", "if", "odd", "print", "println",
+                "procedure", "read", "sqrt", "then", "var", "while", "write", "writeln")
 
         // 设置保留字符号
         keywordTable[0] = Symbol.arraySym
@@ -115,13 +115,15 @@ class Scanner(val inReader: BufferedReader) {
         keywordTable[7] = Symbol.ifSym
         keywordTable[8] = Symbol.oddSym
         keywordTable[9] = Symbol.printSym
-        keywordTable[10] = Symbol.procSym
-        keywordTable[11] = Symbol.readSym
-        keywordTable[12] = Symbol.sqrtSym
-        keywordTable[13] = Symbol.thenSym
-        keywordTable[14] = Symbol.varSym
-        keywordTable[15] = Symbol.whileSym
-        keywordTable[16] = Symbol.writeSym
+        keywordTable[10] = Symbol.printlnSym
+        keywordTable[11] = Symbol.procSym
+        keywordTable[12] = Symbol.readSym
+        keywordTable[13] = Symbol.sqrtSym
+        keywordTable[14] = Symbol.thenSym
+        keywordTable[15] = Symbol.varSym
+        keywordTable[16] = Symbol.whileSym
+        keywordTable[17] = Symbol.writeSym
+        keywordTable[18] = Symbol.writelnSym
     }
 
     /**
@@ -178,7 +180,6 @@ class Scanner(val inReader: BufferedReader) {
      * 分析关键字或者一般标识符
      */
     private fun matchKeywordOrIdentifier() {
-        val i: Int
         val sb = StringBuilder(PL0.SYMBOL_MAX_LENGTH)
         // 首先把整个单词读出来
         do {
@@ -186,17 +187,17 @@ class Scanner(val inReader: BufferedReader) {
             getChar()
         } while (justReadChar in 'a'..'z' || justReadChar in '0'..'9' || justReadChar == '_')
         id = sb.toString()
+        val i: Int = java.util.Arrays.binarySearch(keyword, id)
 
         // 然后搜索是不是保留字（请注意使用的是什么搜索方法）
-        i = java.util.Arrays.binarySearch(keyword, id)
 
         // 最后形成符号信息
-        if (i < 0) {
+        currentSymbol = if (i < 0) {
             // 一般标识符
-            currentSymbol = Symbol.ident
+            Symbol.ident
         } else {
             // 关键字
-            currentSymbol = keywordTable[i]
+            keywordTable[i]
         }
     }
 
@@ -265,28 +266,32 @@ class Scanner(val inReader: BufferedReader) {
             }
             '+' -> {
                 getChar()
-                if (justReadChar == '+') {
-                    currentSymbol = Symbol.plusplus
-                    getChar()
-                } else if (justReadChar == '=') {
-                    currentSymbol = Symbol.plusAssSym
-                    getChar()
-                } else {
-                    //单个+号
-                    currentSymbol = Symbol.plus
+                when (justReadChar) {
+                    '+' -> {
+                        currentSymbol = Symbol.plusplus
+                        getChar()
+                    }
+                    '=' -> {
+                        currentSymbol = Symbol.plusAssSym
+                        getChar()
+                    }
+                    else -> //单个+号
+                        currentSymbol = Symbol.plus
                 }
             }
             '-' -> {
                 getChar()
-                if (justReadChar == '-') {
-                    currentSymbol = Symbol.minusminus
-                    getChar()
-                } else if (justReadChar == '=') {
-                    currentSymbol = Symbol.minusAssSym
-                    getChar()
-                } else {
-                    //单个-号
-                    currentSymbol = Symbol.minus
+                when (justReadChar) {
+                    '-' -> {
+                        currentSymbol = Symbol.minusminus
+                        getChar()
+                    }
+                    '=' -> {
+                        currentSymbol = Symbol.minusAssSym
+                        getChar()
+                    }
+                    else -> //单个-号
+                        currentSymbol = Symbol.minus
                 }
             }
             '*' -> {

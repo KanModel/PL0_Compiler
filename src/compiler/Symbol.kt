@@ -10,9 +10,12 @@ enum class Symbol {
     semicolon, //分号;
     period, //句号.
     becomes, //赋值:=
-    beginSym, endSym, ifSym, thenSym, whileSym, writeSym,
+    beginSym, endSym, ifSym, thenSym, whileSym,
     readSym, doSym, callSym, constSym, varSym, procSym,
+    writeSym,
+    writelnSym,
     printSym,
+    printlnSym,
     elseSym,
     sqrtSym, //开方
     comment, //注释

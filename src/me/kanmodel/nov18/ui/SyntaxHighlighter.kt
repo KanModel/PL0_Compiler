@@ -57,7 +57,9 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
         operators = HashSet()
         operators.add("sqrt")
         operators.add("write")
+        operators.add("writeln")
         operators.add("print")
+        operators.add("println")
         operators.add("read")
 
         symbol = HashSet()
@@ -169,13 +171,13 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
      * 取得下标为pos时, 它所在的单词开始的下标. ?±wor^d?± (^表示pos, ?±表示开始或结束的下标)
      *
      * @param doc
-     * @param pos
+     * @param startPos
      * @return
      * @throws BadLocationException
      */
     @Throws(BadLocationException::class)
-    fun indexOfWordStart(doc: Document, pos: Int): Int {
-        var pos = pos
+    fun indexOfWordStart(doc: Document, startPos: Int): Int {
+        var pos = startPos
         // 从pos开始向前找到第一个非单词字符.
         while (pos > 0 && isWordCharacter(doc, pos - 1)) {
             --pos
@@ -188,13 +190,13 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
      * 取得下标为pos时, 它所在的单词结束的下标. ?±wor^d?± (^表示pos, ?±表示开始或结束的下标)
      *
      * @param doc
-     * @param pos
+     * @param endPos
      * @return
      * @throws BadLocationException
      */
     @Throws(BadLocationException::class)
-    fun indexOfWordEnd(doc: Document, pos: Int): Int {
-        var pos = pos
+    fun indexOfWordEnd(doc: Document, endPos: Int): Int {
+        var pos = endPos
         // 从pos开始向前找到第一个非单词字符.
         while (isWordCharacter(doc, pos) && pos < doc.length) {
             ++pos
@@ -207,13 +209,13 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
      * 取得下标为pos时, 它所在的单词结束的下标. ?±wor^d?± (^表示pos, ?±表示开始或结束的下标)
      *
      * @param doc
-     * @param pos
+     * @param endPos
      * @return
      * @throws BadLocationException
      */
     @Throws(BadLocationException::class)
-    fun indexOfCommentEnd(doc: Document, pos: Int): Int {
-        var pos = pos
+    fun indexOfCommentEnd(doc: Document, endPos: Int): Int {
+        var pos = endPos
         // 从pos开始向前找到第一个注释终结符.
         while (isCommentCharacter(doc, pos) && pos < doc.length) {
             ++pos

@@ -4,8 +4,10 @@ package compiler
  * 　　类P-Code代码解释器（含代码生成函数），这个类包含了C语言版中两个重要的全局变量 cx 和 code
  */
 class Interpreter {
-    // 解释执行时使用的栈大小
-    private val STACK_SIZE = 500
+    companion object {
+        // 解释执行时使用的栈大小
+        private const val STACK_SIZE = 500
+    }
 
     /**
      * 虚拟机代码指针，取值范围[0, CX_MAX-1]

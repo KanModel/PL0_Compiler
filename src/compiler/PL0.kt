@@ -58,13 +58,13 @@ class PL0
         lateinit var inReader: BufferedReader
 
         // 编译程序的常数
-        val SYMBOL_MAX_LENGTH = 10            // 符号的最大长度
-        val MAX_NUM = 65565        // 最大允许的数值
-        val CX_MAX = 500        // 最多的虚拟机代码数
-        val LEVEL_MAX = 3            // 最大允许过程嵌套声明层数 [0, LEVEL_MAX]
-        val MAX_NUM_DIGIT = 14            // number的最大位数
-        val KEYWORD_COUNT = 32            // 关键字个数
-        val TABLE_MAX = 200        // 名字表容量
+        const val SYMBOL_MAX_LENGTH = 10            // 符号的最大长度
+        const val MAX_NUM = 65565        // 最大允许的数值
+        const val CX_MAX = 500        // 最多的虚拟机代码数
+        const val LEVEL_MAX = 3            // 最大允许过程嵌套声明层数 [0, LEVEL_MAX]
+        const val MAX_NUM_DIGIT = 14            // number的最大位数
+        const val KEYWORD_COUNT = 32            // 关键字个数
+        const val TABLE_MAX = 200        // 名字表容量
 
         // 一些全局变量，其他关键的变量分布如下：
         // cx, code : compiler.Interpreter

@@ -7,7 +7,9 @@ import compiler.error.Err
  */
 class Parser(val scanner: Scanner, val table: Table, val interpreter: Interpreter) {
 
-    private val SYMBOL_NUM = Symbol.values().size
+    companion object {
+        private val SYMBOL_NUM = Symbol.values().size
+    }
 
     // 表示声明开始的符号集合、表示语句开始的符号集合、表示因子开始的符号集合
     // 实际上这就是声明、语句和因子的FIRST集合
@@ -42,10 +44,12 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
         statementBeginSet.set(Symbol.ifSym)
         statementBeginSet.set(Symbol.whileSym)
         statementBeginSet.set(Symbol.readSym)            // thanks to elu
-        statementBeginSet.set(Symbol.writeSym)
         statementBeginSet.set(Symbol.plusplus)
         statementBeginSet.set(Symbol.minusminus)
+        statementBeginSet.set(Symbol.writeSym)
+        statementBeginSet.set(Symbol.writelnSym)
         statementBeginSet.set(Symbol.printSym)
+        statementBeginSet.set(Symbol.printlnSym)
 
         // 设置因子First集
         factorBeginSet = SymSet(SYMBOL_NUM)
@@ -94,10 +98,10 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
         //（该部分的后跟符号），test负责这项检测，并且负责当检测不通过时的补救措施，程
         // 序在需要检测时指定当前需要的符号集合和补救用的集合（如之前未完成部分的后跟符
         // 号），以及检测不通过时的错误号。
-        if (!s1.get(currentSymbol!!)) {
+        if (!s1[currentSymbol!!]) {
             Err.report(errCode)
             // 当检测不通过时，不停获取符号，直到它属于需要的集合或补救的集合
-            while (!s1.get(currentSymbol!!) && !s2.get(currentSymbol!!))
+            while (!s1[currentSymbol!!] && !s2[currentSymbol!!])
                 nextSymbol()
         }
     }
@@ -119,7 +123,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
         dx0 = dataSize                        // 记录本层之前的数据量（以便恢复）
         dataSize = 3
         tx0 = table.tableSize                    // 记录本层名字的初始位置（以便恢复）
-        table.get(table.tableSize)!!.adr = interpreter.cx
+        table[table.tableSize]!!.adr = interpreter.cx
 
         interpreter.generatePCode(Fct.JMP, 0, 0)
 
@@ -214,7 +218,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
             nextLevel = statementBeginSet.clone() as SymSet
             nextLevel.set(Symbol.ident)
             test(nextLevel, declarationBeginSet, 7)
-        } while (declarationBeginSet.get(currentSymbol!!))        // 直到没有声明符号
+        } while (declarationBeginSet[currentSymbol!!])        // 直到没有声明符号
 
         // 开始生成当前过程代码
         val item = table[tx0]
@@ -300,7 +304,6 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
         when (currentSymbol) {
             Symbol.ident -> parseAssignStatement(fsys, level)
             Symbol.readSym -> parseReadStatement(fsys, level)
-            Symbol.writeSym -> parseWriteStatement(fsys, level)
             Symbol.callSym -> parseCallStatement(fsys, level)
             Symbol.ifSym -> parseIfStatement(fsys, level)
             Symbol.beginSym -> parseBeginStatement(fsys, level)
@@ -308,7 +311,10 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
             Symbol.plusplus -> parsePlusMinusAssign(fsys, level)
             Symbol.minusminus -> parsePlusMinusAssign(fsys, level)
             Symbol.sqrtSym -> parseSqrtStatement(fsys, level)
-            Symbol.printSym -> parsePrintStatement(fsys, level)
+            Symbol.writeSym -> parseWriteStatement(fsys, level, false)
+            Symbol.writelnSym -> parseWriteStatement(fsys, level)
+            Symbol.printSym -> parsePrintStatement(fsys, level, false)
+            Symbol.printlnSym -> parsePrintStatement(fsys, level)
             else -> {
                 nxtlev = SymSet(SYMBOL_NUM)
                 test(fsys, nxtlev, 19)
@@ -361,7 +367,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
         nxtlev.set(Symbol.endSym)
         parseStatement(nxtlev, lev)
         // 循环分析{; <语句>}，直到下一个符号不是语句开始符号或收到end
-        while (statementBeginSet.get(currentSymbol!!) || currentSymbol == Symbol.semicolon) {
+        while (statementBeginSet[currentSymbol!!] || currentSymbol == Symbol.semicolon) {
             if (currentSymbol == Symbol.semicolon)
                 nextSymbol()
             else
@@ -429,7 +435,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
             if (i == 0) {
                 Err.report(11)                    // 过程未找到
             } else {
-                val item = table.get(i)
+                val item = table[i]
                 if (item != null) {
                     if (item.kind == Object.procedure)
                         interpreter.generatePCode(Fct.CAL, lev - item.level, item.adr)
@@ -449,8 +455,12 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
      * @param fsys  后跟符号集
      * @param level 当前层次
     </写语句> */
-    private fun parseWriteStatement(fsys: SymSet, level: Int) {
+    private fun parseWriteStatement(fsys: SymSet, level: Int, isNewLine: Boolean = true) {
         var nxtlev: SymSet
+
+        if (isNewLine) {
+            interpreter.generatePCode(Fct.OPR, 0, 15)//生成换行指令
+        }
 
         nextSymbol()
         if (currentSymbol == Symbol.lParen) {
@@ -469,7 +479,6 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
                 Err.report(33)
             }                // write()中应为完整表达式
         }
-        interpreter.generatePCode(Fct.OPR, 0, 15)
     }
 
     /**
@@ -485,15 +494,15 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
         if (currentSymbol == Symbol.lParen) {
             do {
                 nextSymbol()
-                if (currentSymbol == Symbol.ident)
-                    i = table.position(scanner.id)
+                i = if (currentSymbol == Symbol.ident)
+                    table.position(scanner.id)
                 else
-                    i = 0
+                    0
 
                 if (i == 0) {
                     Err.report(35)            // read()中应是声明过的变量名
                 } else {
-                    val item = table.get(i)
+                    val item = table[i]
                     if (item!!.kind != Object.variable) {
                         Err.report(32)        // read()中的标识符不是变量, thanks to amd
                     } else {
@@ -513,7 +522,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
 
         } else {
             Err.report(33)                    // 格式错误，应是右括号
-            while (!fsys.get(currentSymbol!!))
+            while (!fsys[currentSymbol!!])
                 nextSymbol()
         }
     }
@@ -527,7 +536,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
     private fun parseAssignStatement(fsys: SymSet, lev: Int) {
         val i = table.position(scanner.id)
         if (i > 0) {
-            val item = table.get(i)
+            val item = table[i]
             if (item != null) {
                 if (item.kind == Object.variable) {
                     nextSymbol()
@@ -559,60 +568,66 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
     private fun assign(fsys: SymSet, lev: Int, item: Table.Item) {
         val nxtlev: SymSet
 
-        if (currentSymbol == Symbol.becomes) {
-            nextSymbol()
+        when (currentSymbol) {
+            Symbol.becomes -> {
+                nextSymbol()
 
-            nxtlev = fsys.clone() as SymSet
-            parseExpression(nxtlev, lev)
-            // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
-            storeVar(lev, item)
-        } else if (currentSymbol == Symbol.plusAssSym) {
-            nextSymbol()
+                nxtlev = fsys.clone() as SymSet
+                parseExpression(nxtlev, lev)
+                // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
+                storeVar(lev, item)
+            }
+            Symbol.plusAssSym -> {
+                nextSymbol()
 
-            nxtlev = fsys.clone() as SymSet
-            loadVar(lev, item)
-            parseExpression(nxtlev, lev)
-            // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
-            interpreter.generatePCode(Fct.OPR, 0, 2)
-            storeVar(lev, item)
-        } else if (currentSymbol == Symbol.minusAssSym) {
-            nextSymbol()
+                nxtlev = fsys.clone() as SymSet
+                loadVar(lev, item)
+                parseExpression(nxtlev, lev)
+                // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
+                interpreter.generatePCode(Fct.OPR, 0, 2)
+                storeVar(lev, item)
+            }
+            Symbol.minusAssSym -> {
+                nextSymbol()
 
-            nxtlev = fsys.clone() as SymSet
-            loadVar(lev, item)
-            parseExpression(nxtlev, lev)
-            // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
-            interpreter.generatePCode(Fct.OPR, 0, 3)
-            storeVar(lev, item)
-        } else if (currentSymbol == Symbol.timesAssSym) {
-            nextSymbol()
+                nxtlev = fsys.clone() as SymSet
+                loadVar(lev, item)
+                parseExpression(nxtlev, lev)
+                // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
+                interpreter.generatePCode(Fct.OPR, 0, 3)
+                storeVar(lev, item)
+            }
+            Symbol.timesAssSym -> {
+                nextSymbol()
 
-            nxtlev = fsys.clone() as SymSet
-            loadVar(lev, item)
-            parseExpression(nxtlev, lev)
-            // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
-            interpreter.generatePCode(Fct.OPR, 0, 4)
-            storeVar(lev, item)
-        } else if (currentSymbol == Symbol.slashAssSym) {
-            nextSymbol()
+                nxtlev = fsys.clone() as SymSet
+                loadVar(lev, item)
+                parseExpression(nxtlev, lev)
+                // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
+                interpreter.generatePCode(Fct.OPR, 0, 4)
+                storeVar(lev, item)
+            }
+            Symbol.slashAssSym -> {
+                nextSymbol()
 
-            nxtlev = fsys.clone() as SymSet
-            loadVar(lev, item)
-            parseExpression(nxtlev, lev)
-            // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
-            interpreter.generatePCode(Fct.OPR, 0, 5)
-            storeVar(lev, item)
-        } else if (currentSymbol == Symbol.modAssSym) {
-            nextSymbol()
+                nxtlev = fsys.clone() as SymSet
+                loadVar(lev, item)
+                parseExpression(nxtlev, lev)
+                // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
+                interpreter.generatePCode(Fct.OPR, 0, 5)
+                storeVar(lev, item)
+            }
+            Symbol.modAssSym -> {
+                nextSymbol()
 
-            nxtlev = fsys.clone() as SymSet
-            loadVar(lev, item)
-            parseExpression(nxtlev, lev)
-            // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
-            interpreter.generatePCode(Fct.OPR, 0, 21)
-            storeVar(lev, item)
-        } else {
-            Err.report(13)                // 没有检测到赋值符号
+                nxtlev = fsys.clone() as SymSet
+                loadVar(lev, item)
+                parseExpression(nxtlev, lev)
+                // parseExpression将产生一系列指令，但最终结果将会保存在栈顶，执行sto命令完成赋值
+                interpreter.generatePCode(Fct.OPR, 0, 21)
+                storeVar(lev, item)
+            }
+            else -> Err.report(13)                // 没有检测到赋值符号
         }
     }
 
@@ -714,7 +729,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
 
                 val i = table.position(scanner.id)
                 if (i > 0) {
-                    val item = table.get(i)
+                    val item = table[i]
                     if (item != null) {
                         if (item.kind == Object.variable) {
                             interpreter.generatePCode(Fct.STO, lev - item.level, item.adr)//保存栈顶到变量值
@@ -751,12 +766,11 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
             nxtlev.set(Symbol.minus)
             nxtlev.set(Symbol.mod)
             parseTerm(nxtlev, lev)
-            if (addop == Symbol.plus)
-                interpreter.generatePCode(Fct.OPR, 0, 2)
-            else if (addop == Symbol.minus)
-                interpreter.generatePCode(Fct.OPR, 0, 3)
-            else
-                interpreter.generatePCode(Fct.OPR, 0, 21)
+            when (addop) {
+                Symbol.plus -> interpreter.generatePCode(Fct.OPR, 0, 2)
+                Symbol.minus -> interpreter.generatePCode(Fct.OPR, 0, 3)
+                else -> interpreter.generatePCode(Fct.OPR, 0, 21)
+            }
         }
     }
 
@@ -801,11 +815,11 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
         // the original while... is problematic: var1(var2+var3)
         // thanks to macross
         // while(inset(currentSymbol, factorBeginSet))
-        if (factorBeginSet.get(currentSymbol!!)) {
+        if (factorBeginSet[currentSymbol!!]) {
             if (currentSymbol == Symbol.ident) {            // 因子为常量或变量
                 val i = table.position(scanner.id)
                 if (i > 0) {
-                    val item = table.get(i)
+                    val item = table[i]
                     if (item != null) {
                         when (item.kind) {
                             Object.constant            // 名字为常量
@@ -961,7 +975,7 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
 
             val i = table.position(scanner.id)
             if (i > 0) {
-                val item = table.get(i)
+                val item = table[i]
                 if (item != null) {
                     if (item.kind == Object.variable) {
                         interpreter.generatePCode(Fct.STO, lev - item.level, item.adr)//保存栈顶到变量值
@@ -1042,9 +1056,12 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
      * @param fsys  后跟符号集
      * @param level 当前层次
     </打印语句> */
-    private fun parsePrintStatement(fsys: SymSet, level: Int) {
+    private fun parsePrintStatement(fsys: SymSet, level: Int, isNewLine: Boolean = true) {
         var nxtlev: SymSet
 
+        if (isNewLine) {
+            interpreter.generatePCode(Fct.OPR, 0, 15)
+        }
         nextSymbol()
         if (currentSymbol == Symbol.lParen) {
             do {
@@ -1070,6 +1087,5 @@ class Parser(val scanner: Scanner, val table: Table, val interpreter: Interprete
                 Err.report(33)
             }                // write()中应为完整表达式
         }
-        interpreter.generatePCode(Fct.OPR, 0, 15)
     }
 }
