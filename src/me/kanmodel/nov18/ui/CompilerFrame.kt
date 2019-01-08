@@ -5,6 +5,9 @@ import compiler.error.Err
 import compiler.error.ErrorReason
 import compiler.PL0
 import java.awt.*
+import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
+import java.awt.event.KeyEvent
 import java.io.*
 import javax.swing.*
 import javax.swing.JTextPane
@@ -27,17 +30,27 @@ class CompilerFrame : JFrame() {
         jScrollPane.setViewportView(editor)
 
         val menuBar = JMenuBar()//菜单栏
-        val fileMenu = JMenu("文件")
-        val projectMenu = JMenu("项目")
-        val helpMenu = JMenu("帮助")
-        val newItem = JMenuItem("新建")
-        val openItem = JMenuItem("打开")
-        val closeItem = JMenuItem("关闭")
-        val saveItem = JMenuItem("保存")
-        val aboutItem = JMenuItem("关于")
-        val compileItem = JMenuItem("编译")
-        val runItem = JMenuItem("运行")
-        val compileAndRunItem = JMenuItem("编译&运行")
+        val fileMenu = JMenu("File")
+        fileMenu.setMnemonic('F')
+        val projectMenu = JMenu("Project")
+        projectMenu.setMnemonic('j')
+        val helpMenu = JMenu("Help")
+        helpMenu.setMnemonic('H')
+        val newItem = JMenuItem("New")
+        newItem.setMnemonic('N')
+        newItem.accelerator = KeyStroke.getKeyStroke(KeyEvent.VK_N, Event.CTRL_MASK)
+        val openItem = JMenuItem("Open")
+        openItem.setMnemonic('O')
+        openItem.accelerator = KeyStroke.getKeyStroke(KeyEvent.VK_O, Event.CTRL_MASK)
+        val closeItem = JMenuItem("Exit")
+        val saveItem = JMenuItem("Save")
+        saveItem.accelerator = KeyStroke.getKeyStroke(KeyEvent.VK_S, Event.CTRL_MASK)
+        saveItem.setMnemonic('S')
+        val aboutItem = JMenuItem("About")
+        val compileItem = JMenuItem("Compile")
+        val runItem = JMenuItem("Run")
+        val compileAndRunItem = JMenuItem("Compile&Run")
+        compileAndRunItem.accelerator = KeyStroke.getKeyStroke(KeyEvent.VK_F5, KeyEvent.SHIFT_MASK)
         menuBar.add(fileMenu)
         menuBar.add(projectMenu)
         menuBar.add(helpMenu)
@@ -68,11 +81,14 @@ class CompilerFrame : JFrame() {
                 compileFile(fileString)
             }.start()
         }
-        runItem.addActionListener {
+        val runItemAction = ActionListener {
             Thread {
                 run()
             }.start()
         }
+        runItem.addActionListener(runItemAction)
+        runItem.registerKeyboardAction(runItemAction,
+                KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), JComponent.WHEN_IN_FOCUSED_WINDOW)
         compileAndRunItem.addActionListener {
             Thread {
                 compileFile(fileString)
@@ -152,7 +168,7 @@ class CompilerFrame : JFrame() {
         }
     }
 
-    private fun newFile(){
+    private fun newFile() {
         title = "new$titleName"
         editor.text = ""//打开文件之前清空文本区域
         file = null
@@ -177,12 +193,16 @@ class CompilerFrame : JFrame() {
             val br = BufferedReader(FileReader(file))
             var line: String?
             line = br.readLine()
+            var text = ""
             while (line != null) {
                 //将给定文本追加到文档结尾。如果模型为 null 或者字符串为 null 或空，则不执行任何操作。
                 //虽然大多数 Swing 方法不是线程安全的，但此方法是线程安全的。
 //                jTextArea.append(line + "\r\n")
-                editor.text = editor.text + line + "\r\n"
+                text = text + line + "\r\n"
                 line = br.readLine()
+            }
+            SwingUtilities.invokeLater {
+                editor.text = text
             }
         } catch (ex: IOException) {
             throw RuntimeException("读取失败！")
