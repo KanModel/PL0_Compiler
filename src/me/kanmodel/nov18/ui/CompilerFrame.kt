@@ -30,6 +30,7 @@ class CompilerFrame : JFrame() {
         jScrollPane.horizontalScrollBarPolicy = JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
         jScrollPane.verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
         jScrollPane.setViewportView(editor)
+        jScrollPane.setRowHeaderView(LineNumberHeaderView())
 
         val menuBar = JMenuBar()//²Ëµ¥À¸
         val fileMenu = JMenu("File")
