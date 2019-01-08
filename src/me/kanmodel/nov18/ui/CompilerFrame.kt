@@ -10,6 +10,7 @@ import java.awt.event.ActionListener
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
 import java.io.*
+import java.lang.Exception
 import javax.swing.*
 import javax.swing.JTextPane
 
@@ -158,29 +159,37 @@ class CompilerFrame : JFrame() {
                         var copy = doc.getText(start, end - start)
                         copy = copy.replace("\n", "")
 //                        println(copy)
-                        println(end - start + 1)
-                        editor.document.insertString(end, "${13.toChar()}\n$copy", null)
-                        if (start == 0) {
-                            editor.caretPosition += end - start + 2
-                        } else {
-                            editor.caretPosition += end - start + 1
+//                        println(end - start + 1)
+                        SwingUtilities.invokeLater {
+                            editor.document.insertString(end, "${13.toChar()}\n$copy", null)
+                        }
+                        SwingUtilities.invokeLater{
+                            try {
+                                if (start == 0) {
+                                    editor.caretPosition += end - start + 2
+                                } else {
+                                    editor.caretPosition += end - start + 1
+                                }
+                            } catch (e: Exception) {
+
+                            }
                         }
                     }
-                    if (e.isShiftDown && e.keyCode == KeyEvent.VK_ENTER) {
-                        val pos = editor.caretPosition
-                        val doc = editor.document
-                        var start : Int = pos - 1
-                        var end : Int = pos
-                        var tabCount = 0
-                        while (doc.getText(start, 1)[0] != '\n' && start > 0) {
-                            if (doc.getText(pos, 1)[0].toInt() == 9)
-                                tabCount++
-                            start--
-                        }
-                        while (doc.getText(end, 1)[0] != '\n' && end < doc.endPosition.offset)
-                            end++
-                        editor.document.insertString(end, "${13.toChar()}\n", null)
-                    }
+//                    if (e.isShiftDown && e.keyCode == KeyEvent.VK_ENTER) {
+//                        val pos = editor.caretPosition
+//                        val doc = editor.document
+//                        var start : Int = pos - 1
+//                        var end : Int = pos
+//                        var tabCount = 0
+//                        while (doc.getText(start, 1)[0] != '\n' && start > 0) {
+//                            if (doc.getText(pos, 1)[0].toInt() == 9)
+//                                tabCount++
+//                            start--
+//                        }
+//                        while (doc.getText(end, 1)[0] != '\n' && end < doc.endPosition.offset)
+//                            end++
+//                        editor.document.insertString(end, "${13.toChar()}\n", null)
+//                    }
                 }
             }
         }
