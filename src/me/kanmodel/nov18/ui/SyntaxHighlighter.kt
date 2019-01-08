@@ -378,6 +378,10 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
     }
 
     override fun insertUpdate(e: DocumentEvent) {
+        if (!CompilerFrame.isEdited) {
+            CompilerFrame.isEdited = true
+            CompilerFrame.frame.title = "${CompilerFrame.fileString} *${CompilerFrame.titleName}"
+        }
         try {
             colouring(e.document as StyledDocument, e.offset, e.length)
 //            println("i ${e.offset} ${e.document.getText(e.offset, e.length)}")
@@ -389,6 +393,10 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
     }
 
     override fun removeUpdate(e: DocumentEvent) {
+        if (!CompilerFrame.isEdited) {
+            CompilerFrame.isEdited = true
+            CompilerFrame.frame.title = "${CompilerFrame.fileString} *${CompilerFrame.titleName}"
+        }
         try {
             // 因为删除后光标紧接着影响的单词两边, 所以长度就不需要了
             if (e.offset in commentStarts) {

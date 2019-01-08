@@ -22,8 +22,8 @@ import javax.swing.JTextPane
 class CompilerFrame : JFrame() {
     private val editor = JTextPane()
     private var jScrollPane: JScrollPane = JScrollPane(editor)
-    private var open: FileDialog = FileDialog(this, "打开文档", FileDialog.LOAD)
-    private var save: FileDialog = FileDialog(this, "保存文档", FileDialog.SAVE)
+    private var open: FileDialog = FileDialog(this, "Open File", FileDialog.LOAD)
+    private var save: FileDialog = FileDialog(this, "Save File", FileDialog.SAVE)
 
     init {
         initHighlightPane()
@@ -73,9 +73,12 @@ class CompilerFrame : JFrame() {
         saveItem.addActionListener {
             if (file == null) {
                 createNewFile()
-            }
-            if (file != null) {
+            }else{
                 saveFile()
+                if (isEdited) {
+                    isEdited = false
+                    frame.title = "$fileString$titleName"
+                }
             }
         }
         compileItem.addActionListener {
@@ -100,7 +103,7 @@ class CompilerFrame : JFrame() {
         closeItem.addActionListener { System.exit(0) }
         aboutItem.addActionListener {
             JOptionPane.showMessageDialog(null, "\n" +
-                    "             PL0 编译器客户端\n" +
+                    "             PL0 Editor\n" +
                     "                         ——by KanModel\n" +
                     "https://github.com/KanModel/PL0_Compiler")
         }
@@ -220,7 +223,7 @@ class CompilerFrame : JFrame() {
         ArrayStore.arrayInfoList.clear()
 
         if (file == null) {
-            JOptionPane.showMessageDialog(frame, "请先打开文件!", "警告", JOptionPane.WARNING_MESSAGE)
+            JOptionPane.showMessageDialog(frame, "Please open file!", "Waring", JOptionPane.WARNING_MESSAGE)
             return
         }
         val fin: BufferedReader
@@ -256,14 +259,15 @@ class CompilerFrame : JFrame() {
             PL0.interpreter.interpret()
             PL0.resultPrintStream.close()
         } else {
-            JOptionPane.showMessageDialog(frame, "请先编译成功后运行!", "警告", JOptionPane.WARNING_MESSAGE)
+            JOptionPane.showMessageDialog(frame, "Please compile", "Waring", JOptionPane.WARNING_MESSAGE)
         }
     }
 
     private fun newFile() {
-        title = "new$titleName"
         editor.text = ""//打开文件之前清空文本区域
+        title = "new$titleName"
         file = null
+        isEdited = false
     }
 
     private fun openFile() {
@@ -275,8 +279,7 @@ class CompilerFrame : JFrame() {
             return
         }
         fileString = dirPath + fileName
-        println("打开文件: $fileString")
-        frame.title = "$fileString$titleName"
+        println("Open file: $fileString")
         file = File(dirPath, fileName)
 
         editor.text = ""//打开文件之前清空文本区域
@@ -295,9 +298,11 @@ class CompilerFrame : JFrame() {
             }
             SwingUtilities.invokeLater {
                 editor.text = text
+                isEdited = false
+                frame.title = "$fileString$titleName"
             }
         } catch (ex: IOException) {
-            throw RuntimeException("读取失败！")
+            throw RuntimeException("Read failed")
         }
     }
 
@@ -331,12 +336,13 @@ class CompilerFrame : JFrame() {
     }
 
     companion object {
-        const val titleName = " - PL0 Compiler"
+        const val titleName = " - PL0 Compiler & Editor"
         private var file: File? = null
         var isCompileSuccess = false
         var fileString: String? = null
 
 
+        var isEdited = false
         val frame = CompilerFrame()
 
         @JvmStatic
