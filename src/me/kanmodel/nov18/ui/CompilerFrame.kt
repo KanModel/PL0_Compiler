@@ -8,6 +8,7 @@ import java.awt.*
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import java.awt.event.KeyEvent
+import java.awt.event.KeyListener
 import java.io.*
 import javax.swing.*
 import javax.swing.JTextPane
@@ -102,6 +103,88 @@ class CompilerFrame : JFrame() {
                     "                         ¡ª¡ªby KanModel\n" +
                     "https://github.com/KanModel/PL0_Compiler")
         }
+
+        val paneKeyListener = object : KeyListener{
+            override fun keyTyped(e: KeyEvent?) {}
+            override fun keyReleased(e: KeyEvent?) {
+                if (e != null) {
+                    if (e.keyCode == KeyEvent.VK_ENTER) {
+                        var pos = editor.caretPosition - 2
+                        var end : Int = editor.caretPosition - 1
+//                        println(end)
+                        val doc = editor.document
+                        var tabCount = 0
+                        while (doc.getText(pos, 1)[0] != '\n' && pos > 0) {
+                            if (doc.getText(pos, 1)[0].toInt() == 9)
+                                tabCount++
+                            pos--
+                        }
+                        if (pos == 0) {
+                            if (doc.getText(pos, 1)[0].toInt() == 9) {
+                                tabCount++
+                            }
+                        }
+                        while (doc.getText(end, 1)[0] != '\n' && end < doc.endPosition.offset){}
+                        end++
+//                        println(tabCount)
+                        if (tabCount > 0) {
+//                            SwingUtilities.invokeLater {
+//                                editor.document.remove(end, 1)
+//                            }
+//                            var str = "${13.toChar()}\n"
+                            var str = ""
+                            for (i in 1..tabCount) {
+                                str = "$str${9.toChar()}"
+//                                println(str)
+                            }
+                            SwingUtilities.invokeLater {
+                                editor.document.insertString(end, str, null)
+                            }
+                        }
+                    }
+                }
+            }
+            override fun keyPressed(e: KeyEvent?) {
+                if (e != null) {
+                    if (e.isControlDown && e.keyCode == KeyEvent.VK_D) {
+                        val pos = editor.caretPosition
+                        val doc = editor.document
+                        var start : Int = pos - 1
+                        var end : Int = pos
+                        while (doc.getText(start, 1)[0] != '\n' && start > 0)
+                            start--
+                        while (doc.getText(end, 1)[0] != '\n' && end < doc.endPosition.offset)
+                            end++
+                        var copy = doc.getText(start, end - start)
+                        copy = copy.replace("\n", "")
+//                        println(copy)
+                        println(end - start + 1)
+                        editor.document.insertString(end, "${13.toChar()}\n$copy", null)
+                        if (start == 0) {
+                            editor.caretPosition += end - start + 2
+                        } else {
+                            editor.caretPosition += end - start + 1
+                        }
+                    }
+                    if (e.isShiftDown && e.keyCode == KeyEvent.VK_ENTER) {
+                        val pos = editor.caretPosition
+                        val doc = editor.document
+                        var start : Int = pos - 1
+                        var end : Int = pos
+                        var tabCount = 0
+                        while (doc.getText(start, 1)[0] != '\n' && start > 0) {
+                            if (doc.getText(pos, 1)[0].toInt() == 9)
+                                tabCount++
+                            start--
+                        }
+                        while (doc.getText(end, 1)[0] != '\n' && end < doc.endPosition.offset)
+                            end++
+                        editor.document.insertString(end, "${13.toChar()}\n", null)
+                    }
+                }
+            }
+        }
+        editor.addKeyListener(paneKeyListener)
 
         add(menuBar, BorderLayout.NORTH)
         add(jScrollPane, BorderLayout.CENTER)
