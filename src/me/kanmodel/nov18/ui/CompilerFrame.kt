@@ -48,11 +48,19 @@ class CompilerFrame : JFrame() {
         val saveItem = JMenuItem("Save")
         saveItem.accelerator = KeyStroke.getKeyStroke(KeyEvent.VK_S, Event.CTRL_MASK)
         saveItem.setMnemonic('S')
-        val aboutItem = JMenuItem("About")
         val compileItem = JMenuItem("Compile")
+        compileItem.accelerator = KeyStroke.getKeyStroke(KeyEvent.VK_F6, KeyEvent.SHIFT_MASK)
+        compileItem.setMnemonic('C')
         val runItem = JMenuItem("Run")
+        runItem.accelerator = KeyStroke.getKeyStroke(KeyEvent.VK_U, KeyEvent.SHIFT_MASK)
+        runItem.setMnemonic('U')
         val compileAndRunItem = JMenuItem("Compile&Run")
         compileAndRunItem.accelerator = KeyStroke.getKeyStroke(KeyEvent.VK_F5, KeyEvent.SHIFT_MASK)
+        compileAndRunItem.setMnemonic('R')
+        val shortcutItem = JMenuItem("Shortcut")
+        shortcutItem.setMnemonic('O')
+        val aboutItem = JMenuItem("About")
+        aboutItem.setMnemonic('A')
         menuBar.add(fileMenu)
         menuBar.add(projectMenu)
         menuBar.add(helpMenu)
@@ -63,6 +71,7 @@ class CompilerFrame : JFrame() {
         projectMenu.add(compileItem)
         projectMenu.add(runItem)
         projectMenu.add(compileAndRunItem)
+        helpMenu.add(shortcutItem)
         helpMenu.add(aboutItem)
         newItem.addActionListener {
             newFile()
@@ -101,6 +110,36 @@ class CompilerFrame : JFrame() {
             }.start()
         }
         closeItem.addActionListener { System.exit(0) }
+        val shortCutMessage = JLabel("<html><table>\n" +
+                "<br>Shortcut List</br>\n"+
+                "<tr>\n" +
+                "  <td>New</td>\n" +
+                "  <td>Ctrl-N</td>\n" +
+                "</tr>\n" +
+                "<tr>\n" +
+                "  <td>Open</td>\n" +
+                "  <td>Ctrl-O</td>\n" +
+                "</tr>\n" +
+                "<tr>\n" +
+                "  <td>Save</td>\n" +
+                "  <td>Ctrl-S</td>\n" +
+                "</tr>\n" +
+                "<tr>\n" +
+                "  <td>Compile</td>\n" +
+                "  <td>Shift-F6</td>\n" +
+                "</tr>\n" +
+                "<tr>\n" +
+                "  <td>Run</td>\n" +
+                "  <td>F5/Shift-U</td>\n" +
+                "</tr>\n" +
+                "<tr>\n" +
+                "  <td>Compile&Run</td>\n" +
+                "  <td>Shift-F5</td>\n" +
+                "</tr>\n" +
+                "</table></html>")
+        shortcutItem.addActionListener {
+            JOptionPane.showMessageDialog(null, shortCutMessage)
+        }
         aboutItem.addActionListener {
             JOptionPane.showMessageDialog(null, "\n" +
                     "             PL0 Editor\n" +
@@ -113,36 +152,38 @@ class CompilerFrame : JFrame() {
             override fun keyReleased(e: KeyEvent?) {
                 if (e != null) {
                     if (e.keyCode == KeyEvent.VK_ENTER) {
-                        var pos = editor.caretPosition - 2
-                        var end : Int = editor.caretPosition - 1
-//                        println(end)
                         val doc = editor.document
-                        var tabCount = 0
-                        while (doc.getText(pos, 1)[0] != '\n' && pos > 0) {
-                            if (doc.getText(pos, 1)[0].toInt() == 9)
-                                tabCount++
-                            pos--
-                        }
-                        if (pos == 0) {
-                            if (doc.getText(pos, 1)[0].toInt() == 9) {
-                                tabCount++
+                        if (doc.length > 2) {
+                            var pos = editor.caretPosition - 2
+                            var end : Int = editor.caretPosition - 1
+//                        println(end)
+                            var tabCount = 0
+                            while (doc.getText(pos, 1)[0] != '\n' && pos > 0) {
+                                if (doc.getText(pos, 1)[0].toInt() == 9)
+                                    tabCount++
+                                pos--
                             }
-                        }
-                        while (doc.getText(end, 1)[0] != '\n' && end < doc.endPosition.offset){}
-                        end++
+                            if (pos == 0) {
+                                if (doc.getText(pos, 1)[0].toInt() == 9) {
+                                    tabCount++
+                                }
+                            }
+                            while (doc.getText(end, 1)[0] != '\n' && end < doc.endPosition.offset){}
+                            end++
 //                        println(tabCount)
-                        if (tabCount > 0) {
+                            if (tabCount > 0) {
 //                            SwingUtilities.invokeLater {
 //                                editor.document.remove(end, 1)
 //                            }
 //                            var str = "${13.toChar()}\n"
-                            var str = ""
-                            for (i in 1..tabCount) {
-                                str = "$str${9.toChar()}"
+                                var str = ""
+                                for (i in 1..tabCount) {
+                                    str = "$str${9.toChar()}"
 //                                println(str)
-                            }
-                            SwingUtilities.invokeLater {
-                                editor.document.insertString(end, str, null)
+                                }
+                                SwingUtilities.invokeLater {
+                                    editor.document.insertString(end, str, null)
+                                }
                             }
                         }
                     }
@@ -151,30 +192,33 @@ class CompilerFrame : JFrame() {
             override fun keyPressed(e: KeyEvent?) {
                 if (e != null) {
                     if (e.isControlDown && e.keyCode == KeyEvent.VK_D) {
-                        val pos = editor.caretPosition
+
                         val doc = editor.document
-                        var start : Int = pos - 1
-                        var end : Int = pos
-                        while (doc.getText(start, 1)[0] != '\n' && start > 0)
-                            start--
-                        while (doc.getText(end, 1)[0] != '\n' && end < doc.endPosition.offset)
-                            end++
-                        var copy = doc.getText(start, end - start)
-                        copy = copy.replace("\n", "")
+                        if (doc.length > 2) {
+                            val pos = editor.caretPosition
+                            var start : Int = pos - 1
+                            var end : Int = pos
+                            while (doc.getText(start, 1)[0] != '\n' && start > 0)
+                                start--
+                            while (doc.getText(end, 1)[0] != '\n' && end < doc.endPosition.offset)
+                                end++
+                            var copy = doc.getText(start, end - start)
+                            copy = copy.replace("\n", "")
 //                        println(copy)
 //                        println(end - start + 1)
-                        SwingUtilities.invokeLater {
-                            editor.document.insertString(end, "${13.toChar()}\n$copy", null)
-                        }
-                        SwingUtilities.invokeLater{
-                            try {
-                                if (start == 0) {
-                                    editor.caretPosition += end - start + 2
-                                } else {
-                                    editor.caretPosition += end - start + 1
-                                }
-                            } catch (e: Exception) {
+                            SwingUtilities.invokeLater {
+                                editor.document.insertString(end, "${13.toChar()}\n$copy", null)
+                            }
+                            SwingUtilities.invokeLater{
+                                try {
+                                    if (start == 0) {
+                                        editor.caretPosition += end - start + 2
+                                    } else {
+                                        editor.caretPosition += end - start + 1
+                                    }
+                                } catch (e: Exception) {
 
+                                }
                             }
                         }
                     }
