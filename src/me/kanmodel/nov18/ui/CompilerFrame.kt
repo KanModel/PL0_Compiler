@@ -77,10 +77,16 @@ class CompilerFrame : JFrame() {
         helpMenu.add(shortcutItem)
         helpMenu.add(aboutItem)
         newItem.addActionListener {
-            newFile()
+            thread(start = true) {
+                println("new thread")
+                newFile()
+            }
         }
         openItem.addActionListener {
-            openFile()
+            thread(start = true) {
+                println("open thread")
+                openFile()
+            }
         }
         saveItem.addActionListener {
             thread(start = true) {
@@ -89,9 +95,11 @@ class CompilerFrame : JFrame() {
                     saveFile()
                 } else {
                     saveFile()
-                    if (isEdited) {
-                        isEdited = false
-                        frame.title = "$fileString$titleName"
+                    SwingUtilities.invokeLater {
+                        if (isEdited) {
+                            isEdited = false
+                            frame.title = "$fileString$titleName"
+                        }
                     }
                 }
             }
@@ -151,13 +159,17 @@ class CompilerFrame : JFrame() {
                 "</tr>\n" +
                 "</table></html>")
         shortcutItem.addActionListener {
-            JOptionPane.showMessageDialog(null, shortCutMessage)
+            thread(start = true) {
+                JOptionPane.showMessageDialog(null, shortCutMessage)
+            }
         }
         aboutItem.addActionListener {
-            JOptionPane.showMessageDialog(null, "\n" +
-                    "             PL0 Editor\n" +
-                    "                         ！！by KanModel\n" +
-                    "https://github.com/KanModel/PL0_Compiler")
+            thread(start = true) {
+                JOptionPane.showMessageDialog(null, "\n" +
+                        "             PL0 Editor\n" +
+                        "                         ！！by KanModel\n" +
+                        "https://github.com/KanModel/PL0_Compiler")
+            }
         }
 
         val paneKeyListener = object : KeyListener {
@@ -365,12 +377,11 @@ class CompilerFrame : JFrame() {
             SwingUtilities.invokeLater {
                 editor.text = text
                 isEdited = false
-                SwingUtilities.invokeLater {
-                    frame.title = "$fileString$titleName"
-                }
+                frame.title = "$fileString$titleName"
             }
         } catch (ex: IOException) {
-            throw RuntimeException("Read failed")
+//            throw RuntimeException("Read failed")
+            println("Read failed, maybe the file not exists.")
         }
     }
 

@@ -24,15 +24,17 @@ class LineNumberHeaderView : javax.swing.JComponent() {
             font = defaultFont
             foreground = defaultForeground
             background = defaultBackground
-            setPreferredSize(4)
+            setPreferredSize(10)
         }
     }
 
     private fun setPreferredSize(row: Int) {
-        val width = fontMetrics!!.stringWidth(row.toString())
-        if (currentRowWidth < width) {
-            currentRowWidth = width
-            preferredSize = Dimension(2 * MARGIN + width + 1, nHEIGHT)
+        SwingUtilities.invokeLater {
+            val width = fontMetrics!!.stringWidth(row.toString())
+            if (currentRowWidth < width) {
+                currentRowWidth = width
+                preferredSize = Dimension(2 * MARGIN + width + 1, nHEIGHT)
+            }
         }
     }
 
