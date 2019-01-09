@@ -160,15 +160,16 @@ class CompilerFrame : JFrame() {
                 "</table></html>")
         shortcutItem.addActionListener {
             thread(start = true) {
-                JOptionPane.showMessageDialog(null, shortCutMessage)
+                JOptionPane.showMessageDialog(null, shortCutMessage, "Shortcut Reference", JOptionPane.INFORMATION_MESSAGE)
             }
         }
         aboutItem.addActionListener {
             thread(start = true) {
                 JOptionPane.showMessageDialog(null, "\n" +
-                        "             PL0 Editor\n" +
+                        "          PL/0 Editor V $VERSION\n" +
                         "                         ¡ª¡ªby KanModel\n" +
-                        "https://github.com/KanModel/PL0_Compiler")
+                        "https://github.com/KanModel/PL0_Compiler"
+                ,"About", JOptionPane.INFORMATION_MESSAGE)
             }
         }
 
@@ -176,39 +177,34 @@ class CompilerFrame : JFrame() {
             override fun keyTyped(e: KeyEvent?) {}
             override fun keyReleased(e: KeyEvent?) {
                 if (e != null) {
-                    if (e.keyCode == KeyEvent.VK_ENTER) {
-                        val doc = editor.document
-                        if (doc.length > 2) {
-                            var pos = editor.caretPosition - 2
-                            var end: Int = editor.caretPosition - 1
-//                        println(end)
-                            var tabCount = 0
-                            while (doc.getText(pos, 1)[0] != '\n' && pos > 0) {
-                                if (doc.getText(pos, 1)[0].toInt() == 9)
-                                    tabCount++
-                                pos--
-                            }
-                            if (pos == 0) {
-                                if (doc.getText(pos, 1)[0].toInt() == 9) {
-                                    tabCount++
+                    thread(start = true) {
+                        if (e.keyCode == KeyEvent.VK_ENTER) {
+                            val doc = editor.document
+                            if (doc.length > 2) {
+                                var pos = editor.caretPosition - 2
+                                var end: Int = editor.caretPosition
+                                var tabCount = 0
+                                while (doc.getText(pos, 1)[0] != '\n' && pos > 0) {
+                                    if (doc.getText(pos, 1)[0].toInt() == 9)
+                                        tabCount++
+                                    pos--
                                 }
-                            }
-                            while (doc.getText(end, 1)[0] != '\n' && end < doc.endPosition.offset) {
-                            }
-                            end++
-//                        println(tabCount)
-                            if (tabCount > 0) {
-//                            SwingUtilities.invokeLater {
-//                                editor.document.remove(end, 1)
-//                            }
-//                            var str = "${13.toChar()}\n"
-                                var str = ""
-                                for (i in 1..tabCount) {
-                                    str = "$str${9.toChar()}"
-//                                println(str)
+                                if (pos == 0) {
+                                    if (doc.getText(pos, 1)[0].toInt() == 9) {
+                                        tabCount++
+                                    }
                                 }
-                                SwingUtilities.invokeLater {
-                                    editor.document.insertString(end, str, null)
+                                while (doc.getText(end, 1)[0] != '\n' && end < doc.endPosition.offset) {
+                                    end++
+                                }
+                                if (tabCount > 0) {
+                                    var str = ""
+                                    for (i in 1..tabCount) {
+                                        str = "$str${9.toChar()}"
+                                    }
+                                    SwingUtilities.invokeLater {
+                                        editor.document.insertString(end, str, null)
+                                    }
                                 }
                             }
                         }
@@ -218,33 +214,33 @@ class CompilerFrame : JFrame() {
 
             override fun keyPressed(e: KeyEvent?) {
                 if (e != null) {
-                    if (e.isControlDown && e.keyCode == KeyEvent.VK_D) {
+                    thread(start = true) {
+                        if (e.isControlDown && e.keyCode == KeyEvent.VK_D) {
 
-                        val doc = editor.document
-                        if (doc.length > 2) {
-                            val pos = editor.caretPosition
-                            var start: Int = pos - 1
-                            var end: Int = pos
-                            while (doc.getText(start, 1)[0] != '\n' && start > 0)
-                                start--
-                            while (doc.getText(end, 1)[0] != '\n' && end < doc.endPosition.offset)
-                                end++
-                            var copy = doc.getText(start, end - start)
-                            copy = copy.replace("\n", "")
-//                        println(copy)
-//                        println(end - start + 1)
-                            SwingUtilities.invokeLater {
-                                editor.document.insertString(end, "${13.toChar()}\n$copy", null)
-                            }
-                            SwingUtilities.invokeLater {
-                                try {
-                                    if (start == 0) {
-                                        editor.caretPosition += end - start + 2
-                                    } else {
-                                        editor.caretPosition += end - start + 1
+                            val doc = editor.document
+                            if (doc.length > 2) {
+                                val pos = editor.caretPosition
+                                var start: Int = pos - 1
+                                var end: Int = pos
+                                while (doc.getText(start, 1)[0] != '\n' && start > 0)
+                                    start--
+                                while (doc.getText(end, 1)[0] != '\n' && end < doc.endPosition.offset)
+                                    end++
+                                var copy = doc.getText(start, end - start)
+                                copy = copy.replace("\n", "")
+                                SwingUtilities.invokeLater {
+                                    editor.document.insertString(end, "${13.toChar()}\n$copy", null)
+                                }
+                                SwingUtilities.invokeLater {
+                                    try {
+                                        if (start == 0) {
+                                            editor.caretPosition += end - start + 2
+                                        } else {
+                                            editor.caretPosition += end - start + 1
+                                        }
+                                    } catch (e: Exception) {
+
                                     }
-                                } catch (e: Exception) {
-
                                 }
                             }
                         }
@@ -417,6 +413,7 @@ class CompilerFrame : JFrame() {
     }
 
     companion object {
+        const val VERSION = "1.0.001"
         const val titleName = " - PL0 Compiler & Editor"
         private var file: File? = null
         var isCompileSuccess = false
