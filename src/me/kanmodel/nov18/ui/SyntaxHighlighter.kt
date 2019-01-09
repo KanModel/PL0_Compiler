@@ -143,19 +143,19 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
                     }
                 }
                 start = colouringComment(doc, start)
-            } else if (ch in symbols) {
-                var isComment = false
-                commentStarts.forEach {
-                    if (it < start) {
-                        isComment = true
-                    }
-                }
-                if (!isComment) {
-                    SwingUtilities.invokeLater(ColouringTask(doc, start, 1, symbolStyle))
-                } else {
-                    colouringComment(doc, pos)
-                }
-                ++start
+//            } else if (ch in symbols) {
+//                var isComment = false
+//                commentStarts.forEach {
+//                    if (it < start) {
+//                        isComment = true
+//                    }
+//                }
+//                if (!isComment) {
+//                    SwingUtilities.invokeLater(ColouringTask(doc, start, 1, symbolStyle))
+//                } else {
+//                    colouringComment(doc, pos)
+//                }
+//                ++start
             } else {
                 var isComment = false
                 commentStarts.forEach {
