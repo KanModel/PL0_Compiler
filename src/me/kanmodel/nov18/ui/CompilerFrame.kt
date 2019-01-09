@@ -13,6 +13,7 @@ import java.io.*
 import java.lang.Exception
 import javax.swing.*
 import javax.swing.JTextPane
+import kotlin.concurrent.thread
 
 /**
  * @description: 编译器客户端
@@ -46,6 +47,7 @@ class CompilerFrame : JFrame() {
         openItem.setMnemonic('O')
         openItem.accelerator = KeyStroke.getKeyStroke(KeyEvent.VK_O, Event.CTRL_MASK)
         val closeItem = JMenuItem("Exit")
+        closeItem.setMnemonic('E')
         val saveItem = JMenuItem("Save")
         saveItem.accelerator = KeyStroke.getKeyStroke(KeyEvent.VK_S, Event.CTRL_MASK)
         saveItem.setMnemonic('S')
@@ -81,38 +83,44 @@ class CompilerFrame : JFrame() {
             openFile()
         }
         saveItem.addActionListener {
-            if (file == null) {
-                createNewFile()
-            }else{
-                saveFile()
-                if (isEdited) {
-                    isEdited = false
-                    frame.title = "$fileString$titleName"
+            thread(start = true) {
+                if (file == null) {
+                    createNewFile()
+                    saveFile()
+                } else {
+                    saveFile()
+                    if (isEdited) {
+                        isEdited = false
+                        frame.title = "$fileString$titleName"
+                    }
                 }
             }
         }
-        compileItem.addActionListener {
-            Thread {
+        val compileItemAction = ActionListener {
+            thread(start = true) {
                 compileFile(fileString)
-            }.start()
+            }
         }
+        compileItem.addActionListener(compileItemAction)
         val runItemAction = ActionListener {
-            Thread {
+            thread(start = true) {
                 run()
-            }.start()
+            }
         }
         runItem.addActionListener(runItemAction)
         runItem.registerKeyboardAction(runItemAction,
                 KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), JComponent.WHEN_IN_FOCUSED_WINDOW)
+        compileItem.registerKeyboardAction(compileItemAction,
+                KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0), JComponent.WHEN_IN_FOCUSED_WINDOW)
         compileAndRunItem.addActionListener {
-            Thread {
+            thread(start = true) {
                 compileFile(fileString)
                 run()
-            }.start()
+            }
         }
         closeItem.addActionListener { System.exit(0) }
         val shortCutMessage = JLabel("<html><table>\n" +
-                "<br>Shortcut List</br>\n"+
+                "<br>Shortcut List</br>\n" +
                 "<tr>\n" +
                 "  <td>New</td>\n" +
                 "  <td>Ctrl-N</td>\n" +
@@ -127,7 +135,7 @@ class CompilerFrame : JFrame() {
                 "</tr>\n" +
                 "<tr>\n" +
                 "  <td>Compile</td>\n" +
-                "  <td>Shift-F6</td>\n" +
+                "  <td>F6/Shift-F6</td>\n" +
                 "</tr>\n" +
                 "<tr>\n" +
                 "  <td>Run</td>\n" +
@@ -136,6 +144,10 @@ class CompilerFrame : JFrame() {
                 "<tr>\n" +
                 "  <td>Compile&Run</td>\n" +
                 "  <td>Shift-F5</td>\n" +
+                "</tr>\n" +
+                "<tr>\n" +
+                "  <td>Quick Copy</td>\n" +
+                "  <td>Ctrl-D</td>\n" +
                 "</tr>\n" +
                 "</table></html>")
         shortcutItem.addActionListener {
@@ -148,7 +160,7 @@ class CompilerFrame : JFrame() {
                     "https://github.com/KanModel/PL0_Compiler")
         }
 
-        val paneKeyListener = object : KeyListener{
+        val paneKeyListener = object : KeyListener {
             override fun keyTyped(e: KeyEvent?) {}
             override fun keyReleased(e: KeyEvent?) {
                 if (e != null) {
@@ -156,7 +168,7 @@ class CompilerFrame : JFrame() {
                         val doc = editor.document
                         if (doc.length > 2) {
                             var pos = editor.caretPosition - 2
-                            var end : Int = editor.caretPosition - 1
+                            var end: Int = editor.caretPosition - 1
 //                        println(end)
                             var tabCount = 0
                             while (doc.getText(pos, 1)[0] != '\n' && pos > 0) {
@@ -169,7 +181,8 @@ class CompilerFrame : JFrame() {
                                     tabCount++
                                 }
                             }
-                            while (doc.getText(end, 1)[0] != '\n' && end < doc.endPosition.offset){}
+                            while (doc.getText(end, 1)[0] != '\n' && end < doc.endPosition.offset) {
+                            }
                             end++
 //                        println(tabCount)
                             if (tabCount > 0) {
@@ -190,6 +203,7 @@ class CompilerFrame : JFrame() {
                     }
                 }
             }
+
             override fun keyPressed(e: KeyEvent?) {
                 if (e != null) {
                     if (e.isControlDown && e.keyCode == KeyEvent.VK_D) {
@@ -197,8 +211,8 @@ class CompilerFrame : JFrame() {
                         val doc = editor.document
                         if (doc.length > 2) {
                             val pos = editor.caretPosition
-                            var start : Int = pos - 1
-                            var end : Int = pos
+                            var start: Int = pos - 1
+                            var end: Int = pos
                             while (doc.getText(start, 1)[0] != '\n' && start > 0)
                                 start--
                             while (doc.getText(end, 1)[0] != '\n' && end < doc.endPosition.offset)
@@ -210,7 +224,7 @@ class CompilerFrame : JFrame() {
                             SwingUtilities.invokeLater {
                                 editor.document.insertString(end, "${13.toChar()}\n$copy", null)
                             }
-                            SwingUtilities.invokeLater{
+                            SwingUtilities.invokeLater {
                                 try {
                                     if (start == 0) {
                                         editor.caretPosition += end - start + 2
@@ -264,6 +278,12 @@ class CompilerFrame : JFrame() {
             createNewFile()
         }
         saveFile()//先保存后编译
+        if (isEdited) {
+            isEdited = false
+            SwingUtilities.invokeLater {
+                title = "$fileString$titleName"
+            }
+        }
         ErrorReason.init()
         ArrayStore.arrayInfoList.clear()
 
@@ -309,9 +329,12 @@ class CompilerFrame : JFrame() {
     }
 
     private fun newFile() {
-        editor.text = ""//打开文件之前清空文本区域
-        title = "new$titleName"
+        SwingUtilities.invokeLater {
+            editor.text = ""//打开文件之前清空文本区域
+            title = "new$titleName"
+        }
         file = null
+        fileString = null
         isEdited = false
     }
 
@@ -325,6 +348,7 @@ class CompilerFrame : JFrame() {
         }
         fileString = dirPath + fileName
         println("Open file: $fileString")
+        isCompileSuccess = false
         file = File(dirPath, fileName)
 
         editor.text = ""//打开文件之前清空文本区域
@@ -335,16 +359,15 @@ class CompilerFrame : JFrame() {
             line = br.readLine()
             var text = ""
             while (line != null) {
-                //将给定文本追加到文档结尾。如果模型为 null 或者字符串为 null 或空，则不执行任何操作。
-                //虽然大多数 Swing 方法不是线程安全的，但此方法是线程安全的。
-//                jTextArea.append(line + "\r\n")
                 text = text + line + "\r\n"
                 line = br.readLine()
             }
             SwingUtilities.invokeLater {
                 editor.text = text
                 isEdited = false
-                frame.title = "$fileString$titleName"
+                SwingUtilities.invokeLater {
+                    frame.title = "$fileString$titleName"
+                }
             }
         } catch (ex: IOException) {
             throw RuntimeException("Read failed")
@@ -359,7 +382,9 @@ class CompilerFrame : JFrame() {
                 val dirPath = save.directory
                 val fileName = save.file
                 fileString = dirPath + fileName
-                frame.title = "$fileString$titleName"
+                SwingUtilities.invokeLater {
+                    frame.title = "$fileString$titleName"
+                }
                 if (dirPath == null || fileName == null) {
                     return
                 }

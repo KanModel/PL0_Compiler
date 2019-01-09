@@ -5,6 +5,7 @@ import java.awt.Dimension
 import java.awt.Font
 import java.awt.FontMetrics
 import java.awt.Graphics
+import javax.swing.SwingUtilities
 
 class LineNumberHeaderView : javax.swing.JComponent() {
     private val defaultFont = Font("Monospaced", 1, 20)
@@ -19,10 +20,12 @@ class LineNumberHeaderView : javax.swing.JComponent() {
         get() = 4
 
     init {
-        font = defaultFont
-        foreground = defaultForeground
-        background = defaultBackground
-        setPreferredSize(4)
+        SwingUtilities.invokeLater {
+            font = defaultFont
+            foreground = defaultForeground
+            background = defaultBackground
+            setPreferredSize(4)
+        }
     }
 
     private fun setPreferredSize(row: Int) {
