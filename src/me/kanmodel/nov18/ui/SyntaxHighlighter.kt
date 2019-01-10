@@ -16,9 +16,6 @@ import javax.swing.text.*
  * @create: 2018-11-20 18:14
  */
 class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
-    private val commentStarts = arrayListOf<Int>()
-    private val commentExistStarts = arrayListOf<Int>()
-    private val commentExistEnds = arrayListOf<Int>()
     private val keywords: MutableSet<String>
     private val operators: MutableSet<String>
     private val keywordStyle: Style = (editor.document as StyledDocument).addStyle("Keyword_Style", null)
@@ -87,13 +84,13 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
                     if (start !in commentStarts) {
                         commentStarts.add(start)
                     }
-                    if (start !in commentExistStarts) {
-                        commentExistStarts.add(start)
-                    }
+//                    if (start !in commentExistStarts) {
+//                        commentExistStarts.add(start)
+//                    }
                 } else {//对}进行处理
-                    if (start !in commentExistEnds) {
-                        commentExistEnds.add(start)//记录}位置
-                    }
+//                    if (start !in commentExistEnds) {
+//                        commentExistEnds.add(start)//记录}位置
+//                    }
                     var short = Int.MAX_VALUE//最近左侧{距离
                     var rShort = Int.MAX_VALUE//最近右侧{距离
                     var shortPos = 0
@@ -126,16 +123,11 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
                 }
                 start = colouringComment(doc, start)//渲染注释
             } else {
-                var isComment = false
-                commentStarts.forEach {
-                    if (it < pos) {
-                        isComment = true
-                    }
-                }
+                val isComment = isComment(start)
                 if (!isComment) {//判断是否为被注释包围的字符串
                     SwingUtilities.invokeLater(ColouringTask(doc, start, 1, normalStyle))
                 } else {
-                    colouringComment(doc, pos)
+                    colouringComment(doc, start)
                 }
                 ++start
             }
@@ -155,42 +147,27 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
         val wordEnd = indexOfWordEnd(doc, pos)
         val word = doc.getText(pos, wordEnd - pos)
 
-        var isComment = false//判断是否被注释包围
+        val isComment = isComment(pos)
         when {
             // 如果是关键字, 就进行关键字的着色, 否则使用普通的着色.
             // 这里有一点要注意, 在insertUpdate和removeUpdate的方法调用的过程中, 不能修改doc的属性.
             // 但我们又要达到能够修改doc的属性, 所以把此任务放到这个方法的外面去执行.
             // 实现这一目的, 可以使用新线程, 但放到swing的事件队列里去处理更轻便一点.
-            word in keywords -> {
-                commentStarts.forEach {
-                    if (it < pos) {
-                        isComment = true
-                    }
-                }
+            word in keywords -> {//关键字渲染
                 if (!isComment) {
                     SwingUtilities.invokeLater(ColouringTask(doc, pos, wordEnd - pos, keywordStyle))
                 } else {
                     colouringComment(doc, pos)
                 }
             }
-            word in operators -> {
-                commentStarts.forEach {
-                    if (it < pos) {
-                        isComment = true
-                    }
-                }
+            word in operators -> {//内置函数渲染
                 if (!isComment) {
                     SwingUtilities.invokeLater(ColouringTask(doc, pos, wordEnd - pos, functionStyle))
                 } else {
                     colouringComment(doc, pos)
                 }
             }
-            else -> {
-                commentStarts.forEach {
-                    if (it < pos) {
-                        isComment = true
-                    }
-                }
+            else -> {//其余字符串
                 if (!isComment) {
                     SwingUtilities.invokeLater(ColouringTask(doc, pos, wordEnd - pos, normalStyle))
                 } else {
@@ -198,7 +175,6 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
                 }
             }
         }
-
         return wordEnd
     }
 
@@ -213,13 +189,13 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
     @Throws(BadLocationException::class)
     fun colouringComment(doc: StyledDocument, pos: Int): Int {
         val wordEnd = indexOfCommentEnd(doc, pos)
-        if (getCharAt(doc, wordEnd - 1) == '}') {
-            if (wordEnd - 1 !in commentExistEnds) {
-                commentExistEnds.add(wordEnd - 1)
-            }
+        if (getCharAt(doc, wordEnd - 1) == '}') {//判断是否配对}
+//            if (wordEnd - 1 !in commentExistEnds) {
+//                commentExistEnds.add(wordEnd - 1)
+//            }
             var short = Int.MAX_VALUE
             var shortPos = 0
-            for (c in commentStarts) {
+            for (c in commentStarts) {//寻找最近{
                 if ((wordEnd - c) > 0) {
                     if ((wordEnd - c) < short) {
                         short = wordEnd - c
@@ -292,7 +268,7 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
     }
 
     /**
-     * 取得下标为pos时, 它所在的单词结束的下标. ?±wor^d?± (^表示pos, ?±表示开始或结束的下标)
+     * 从pos开始向前找到第一个注释终结符 无则返回文本末尾
      *
      * @param doc
      * @param endPos
@@ -353,6 +329,34 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
             }
         }
         try {
+            if (isDebug) {
+                println("${e.offset} ${e.length}")
+            }
+            for (i in 0 until commentExistStarts.size) {
+                if (e.offset <= commentExistStarts[i]) {
+                    commentExistStarts[i] += e.length
+                }
+            }
+            for (i in 0 until commentExistEnds.size) {
+                if (e.offset <= commentExistEnds[i]) {
+                    commentExistEnds[i] += e.length
+                }
+            }
+            for (i in e.offset until e.offset + e.length) {
+                val char = getCharAt(e.document, i)
+                if (char == '}') {
+                    commentExistEnds.add(i)
+                }else if (char == '{') {
+                    commentExistStarts.add(i)
+                }
+            }
+//            commentExistEnds.forEach {
+//                if (e.offset < it) {
+//                    for (i in 1..e.length) {
+//                        it.inc()
+//                    }
+//                }
+//            }
             colouring(e.document as StyledDocument, e.offset, e.length)
         } catch (e1: BadLocationException) {
             e1.printStackTrace()
@@ -422,7 +426,66 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
         }
     }
 
+    private fun isComment(pos: Int): Boolean{
+        var isComment = false//判断是否被注释包围
+        var isSingle = false
+        for (it in commentStarts) {
+            if (it < pos) {
+                isSingle = true
+                isComment = true
+                break
+            }
+        }
+        if (!isSingle) {//判断是否被{}包围
+            var lShort = Int.MAX_VALUE
+            var lPos = 0
+            var haveR = false
+            for (it in commentExistStarts) {//判断左侧是否有{
+                if (it - pos < 0 && pos - it < lShort) {//若有寻求最近{
+                    haveR = true
+                    lShort = pos - it
+                    lPos = it
+                }
+            }
+            if (haveR) {//左侧有{才寻找}
+                var rShort = Int.MAX_VALUE
+                var rPos = 0
+                for (it in commentExistEnds) {
+                    if (it - lPos > 0 && it - lPos < rShort) {
+                        rShort = it - lPos
+                        rPos = it
+                    }
+                }
+                if (pos in lPos..rPos) {
+                    isComment = true
+                }
+            }
+        }
+        if (isDebug) {
+            if (isComment) {
+                println("${++count} comment $commentStarts $commentExistStarts $commentExistEnds")
+            } else {
+                println("${++count} !comment $commentStarts $commentExistStarts $commentExistEnds")
+            }
+        }
+        return isComment
+    }
+
     companion object {
+
+
+        private val commentStarts = arrayListOf<Int>()
+        private val commentExistStarts = arrayListOf<Int>()
+        private val commentExistEnds = arrayListOf<Int>()
+        val isDebug = false
+        var count = 0//debug
+
+        fun clearComment(){
+            commentStarts.clear()
+            commentExistStarts.clear()
+            commentExistEnds.clear()
+        }
+
         @JvmStatic
         fun main(args: Array<String>) {
             val frame = JFrame("TEST")

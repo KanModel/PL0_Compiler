@@ -358,7 +358,7 @@ class CompilerFrame : JFrame() {
         println("Open file: $fileString")
         isCompileSuccess = false
         file = File(dirPath, fileName)
-
+        SyntaxHighlighter.clearComment()
         editor.text = ""//打开文件之前清空文本区域
 
         try {
@@ -413,7 +413,7 @@ class CompilerFrame : JFrame() {
     }
 
     companion object {
-        const val VERSION = "1.0.003"
+        const val VERSION = "1.0.010"
         const val titleName = " - PL0 Compiler & Editor"
         private var file: File? = null
         var isCompileSuccess = false
