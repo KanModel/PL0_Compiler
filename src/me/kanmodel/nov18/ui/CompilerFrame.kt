@@ -179,34 +179,36 @@ class CompilerFrame : JFrame() {
                 if (e != null) {
                     thread(start = true) {
                         if (e.keyCode == KeyEvent.VK_ENTER) {
-                            val doc = editor.document
-                            if (doc.length > 2) {
-                                var pos = editor.caretPosition - 2
-                                var end: Int = editor.caretPosition
-                                var tabCount = 0
-                                while (doc.getText(pos, 1)[0] != '\n' && pos > 0) {
-                                    if (doc.getText(pos, 1)[0].toInt() == 9)
-                                        tabCount++
-                                    pos--
-                                }
-                                if (pos == 0) {
-                                    if (doc.getText(pos, 1)[0].toInt() == 9) {
-                                        tabCount++
+                            try {
+                                val doc = editor.document
+                                if (doc.length > 2) {
+                                    var pos = editor.caretPosition - 2
+                                    var end: Int = editor.caretPosition
+                                    var tabCount = 0
+                                    while (doc.getText(pos, 1)[0] != '\n' && pos > 0) {
+                                        if (doc.getText(pos, 1)[0].toInt() == 9)
+                                            tabCount++
+                                        pos--
+                                    }
+                                    if (pos == 0) {
+                                        if (doc.getText(pos, 1)[0].toInt() == 9) {
+                                            tabCount++
+                                        }
+                                    }
+                                    while (doc.getText(end, 1)[0] != '\n' && end < doc.endPosition.offset) {
+                                        end++
+                                    }
+                                    if (tabCount > 0) {
+                                        var str = ""
+                                        for (i in 1..tabCount) {
+                                            str = "$str${9.toChar()}"
+                                        }
+                                        SwingUtilities.invokeLater {
+                                            editor.document.insertString(end, str, null)
+                                        }
                                     }
                                 }
-                                while (doc.getText(end, 1)[0] != '\n' && end < doc.endPosition.offset) {
-                                    end++
-                                }
-                                if (tabCount > 0) {
-                                    var str = ""
-                                    for (i in 1..tabCount) {
-                                        str = "$str${9.toChar()}"
-                                    }
-                                    SwingUtilities.invokeLater {
-                                        editor.document.insertString(end, str, null)
-                                    }
-                                }
-                            }
+                            } catch (e: Exception) { }//todo
                         }
                     }
                 }
@@ -413,7 +415,7 @@ class CompilerFrame : JFrame() {
     }
 
     companion object {
-        const val VERSION = "1.0.010"
+        const val VERSION = "1.0.011"
         const val titleName = " - PL0 Compiler & Editor"
         private var file: File? = null
         var isCompileSuccess = false

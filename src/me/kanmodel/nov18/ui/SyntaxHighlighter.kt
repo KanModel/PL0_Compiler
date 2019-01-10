@@ -332,6 +332,11 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
             if (isDebug) {
                 println("${e.offset} ${e.length}")
             }
+            for (i in 0 until commentStarts.size) {
+                if (e.offset <= commentExistStarts[i]) {
+                    commentStarts[i] += e.length
+                }
+            }
             for (i in 0 until commentExistStarts.size) {
                 if (e.offset <= commentExistStarts[i]) {
                     commentExistStarts[i] += e.length
