@@ -413,7 +413,7 @@ class CompilerFrame : JFrame() {
     }
 
     companion object {
-        const val VERSION = "1.0.001"
+        const val VERSION = "1.0.002"
         const val titleName = " - PL0 Compiler & Editor"
         private var file: File? = null
         var isCompileSuccess = false

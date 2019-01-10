@@ -102,8 +102,12 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
                 start = colouringWord(doc, start)
             } else if (ch == '{' || ch == '}') {
                 if (ch == '{') {
-                    commentStarts.add(start)
-                    commentExistStarts.add(start)
+                    if (start !in commentStarts) {
+                        commentStarts.add(start)
+                    }
+                    if (start !in commentExistStarts) {
+                        commentExistStarts.add(start)
+                    }
                 } else {
                     if (start !in commentExistEnds) {
                         commentExistEnds.add(start)
@@ -112,9 +116,7 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
                     var short = Int.MAX_VALUE
                     var rShort = Int.MAX_VALUE
                     var shortPos = 0
-//                    var rShortPos = 0
-//                    println("寻找前置{ $commentStarts ccc")
-                    for (c in commentExistStarts) {
+                    for (c in commentExistStarts) {//向前寻找最近{
                         if ((start - c) > 0) {
 //                            short = min(start - c, short)
                             if ((start - c) < short) {
@@ -122,24 +124,25 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
                                 shortPos = c
                             }
                         }
-                        if ((c - start) > 0) {
+                        if ((c - start) > 0) {//往后寻找最近{
                             if ((c - start) < rShort) {
                                 rShort = c - start
-//                                rShortPos = c
                             }
                         }
                     }
-                    if (short != Int.MAX_VALUE) {
+                    if (short != Int.MAX_VALUE) {//找对右侧最近{
 //                        println("配对{ pos:$shortPos colouringComment")
                         colouringComment(doc, shortPos)
                         if (shortPos in commentStarts) {
                             commentStarts.remove(shortPos)
                         }
                     }
-                    if (rShort != Int.MAX_VALUE) {
+                    if (rShort != Int.MAX_VALUE) {//左侧存在最近{
                         colouring(doc, start + 1, rShort)
-                    } else {
-                        colouring(doc, start + 1, doc.length - start - 1)
+                    } else {//不存在则渲染到结尾
+                        if (start + 1 < doc.length) {//判断是否结尾情况
+                            colouring(doc, start + 1, doc.length - start - 1)
+                        }
                     }
                 }
                 start = colouringComment(doc, start)
