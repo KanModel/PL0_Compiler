@@ -21,7 +21,6 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
     private val commentExistEnds = arrayListOf<Int>()
     private val keywords: MutableSet<String>
     private val operators: MutableSet<String>
-    private val symbols: MutableSet<Char>
     private val keywordStyle: Style = (editor.document as StyledDocument).addStyle("Keyword_Style", null)
     private val functionStyle: Style = (editor.document as StyledDocument).addStyle("Operator_Style", null)
     private val symbolStyle: Style = (editor.document as StyledDocument).addStyle("Symbol_Style", null)
@@ -66,23 +65,6 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
         operators.add("println")
         operators.add("read")
 
-        symbols = HashSet()
-        symbols.add(':')
-        symbols.add(';')
-        symbols.add('=')
-        symbols.add('+')
-        symbols.add('-')
-        symbols.add('*')
-        symbols.add('/')
-        symbols.add('.')
-        symbols.add(',')
-        symbols.add('\'')
-        symbols.add('#')
-        symbols.add('"')
-        symbols.add('>')
-        symbols.add('<')
-        symbols.add('!')
-        symbols.add('%')
     }
 
     @Throws(BadLocationException::class)
@@ -100,25 +82,23 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
                 // 如果是以字母或者下划线开头, 说明是单词
                 // pos为处理后的最后一个下标
                 start = colouringWord(doc, start)
-            } else if (ch == '{' || ch == '}') {
-                if (ch == '{') {
+            } else if (ch == '{' || ch == '}') {//注释范围解析
+                if (ch == '{') {//记录{位置
                     if (start !in commentStarts) {
                         commentStarts.add(start)
                     }
                     if (start !in commentExistStarts) {
                         commentExistStarts.add(start)
                     }
-                } else {
+                } else {//对}进行处理
                     if (start !in commentExistEnds) {
-                        commentExistEnds.add(start)
-//                        println("Ends: $commentExistEnds")
+                        commentExistEnds.add(start)//记录}位置
                     }
-                    var short = Int.MAX_VALUE
-                    var rShort = Int.MAX_VALUE
+                    var short = Int.MAX_VALUE//最近左侧{距离
+                    var rShort = Int.MAX_VALUE//最近右侧{距离
                     var shortPos = 0
-                    for (c in commentExistStarts) {//向前寻找最近{
-                        if ((start - c) > 0) {
-//                            short = min(start - c, short)
+                    for (c in commentExistStarts) {
+                        if ((start - c) > 0) {//向前寻找最近{
                             if ((start - c) < short) {
                                 short = start - c
                                 shortPos = c
@@ -131,7 +111,6 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
                         }
                     }
                     if (short != Int.MAX_VALUE) {//找对右侧最近{
-//                        println("配对{ pos:$shortPos colouringComment")
                         colouringComment(doc, shortPos)
                         if (shortPos in commentStarts) {
                             commentStarts.remove(shortPos)
@@ -139,26 +118,13 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
                     }
                     if (rShort != Int.MAX_VALUE) {//左侧存在最近{
                         colouring(doc, start + 1, rShort)
-                    } else {//不存在则渲染到结尾
-                        if (start + 1 < doc.length) {//判断是否结尾情况
+                    } else {//不存在则渲染到文本结尾
+                        if (start + 1 < doc.length) {//判断是否恰好的结尾情况
                             colouring(doc, start + 1, doc.length - start - 1)
                         }
                     }
                 }
-                start = colouringComment(doc, start)
-//            } else if (ch in symbols) {
-//                var isComment = false
-//                commentStarts.forEach {
-//                    if (it < start) {
-//                        isComment = true
-//                    }
-//                }
-//                if (!isComment) {
-//                    SwingUtilities.invokeLater(ColouringTask(doc, start, 1, symbolStyle))
-//                } else {
-//                    colouringComment(doc, pos)
-//                }
-//                ++start
+                start = colouringComment(doc, start)//渲染注释
             } else {
                 var isComment = false
                 commentStarts.forEach {
@@ -166,7 +132,7 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
                         isComment = true
                     }
                 }
-                if (!isComment) {
+                if (!isComment) {//判断是否为被注释包围的字符串
                     SwingUtilities.invokeLater(ColouringTask(doc, start, 1, normalStyle))
                 } else {
                     colouringComment(doc, pos)
@@ -189,7 +155,7 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
         val wordEnd = indexOfWordEnd(doc, pos)
         val word = doc.getText(pos, wordEnd - pos)
 
-        var isComment = false
+        var isComment = false//判断是否被注释包围
         when {
             // 如果是关键字, 就进行关键字的着色, 否则使用普通的着色.
             // 这里有一点要注意, 在insertUpdate和removeUpdate的方法调用的过程中, 不能修改doc的属性.
@@ -250,13 +216,11 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
         if (getCharAt(doc, wordEnd - 1) == '}') {
             if (wordEnd - 1 !in commentExistEnds) {
                 commentExistEnds.add(wordEnd - 1)
-//                println("Ends: $commentExistEnds")
             }
             var short = Int.MAX_VALUE
             var shortPos = 0
             for (c in commentStarts) {
                 if ((wordEnd - c) > 0) {
-//                            short = min(start - c, short)
                     if ((wordEnd - c) < short) {
                         short = wordEnd - c
                         shortPos = c
@@ -264,7 +228,6 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
                 }
             }
             if (short != Int.MAX_VALUE) {
-//                println("配对{ pos:$shortPos")
                 commentStarts.remove(shortPos)
             }
         }
@@ -391,8 +354,6 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
         }
         try {
             colouring(e.document as StyledDocument, e.offset, e.length)
-//            println("i ${e.offset} ${e.document.getText(e.offset, e.length)}")
-//            println(commentStarts)
         } catch (e1: BadLocationException) {
             e1.printStackTrace()
         }
@@ -409,17 +370,14 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
             }
         }
         try {
-            // 因为删除后光标紧接着影响的单词两边, 所以长度就不需要了
-            if (e.offset in commentStarts) {
+            if (e.offset in commentExistStarts) {
                 commentStarts.remove(e.offset)
                 commentExistStarts.remove(e.offset)
-//                println("删除{")
                 colouring(e.document as StyledDocument, e.offset, e.document.length - e.offset)
             } else {
-//                println(getCharAt(e.document as StyledDocument, e.offset))
+                // 因为删除后光标紧接着影响的单词两边, 所以长度就不需要了
                 if (e.offset in commentExistEnds) {
                     commentExistEnds.remove(e.offset)
-//                    println("删除}")
                     val start = e.offset
                     var short = Int.MAX_VALUE
                     var shortPos = 0
@@ -434,7 +392,6 @@ class SyntaxHighlighter(editor: JTextPane) : DocumentListener {
                     }
                     if (short != Int.MAX_VALUE) {
                         commentStarts.add(shortPos)
-//                        println("前置{ pos:$shortPos $commentStarts")
                         colouringComment(e.document as StyledDocument, shortPos)
                     }
                 } else {
